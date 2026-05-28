@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
+import { useIsMobile } from '@/lib/useMediaQuery'
+import CommandPalette from '@/components/CommandPalette'
 
 const nav = [
   { to: '/', label: 'Dashboard', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> },
@@ -21,93 +23,129 @@ function SunIcon() {
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const { t, theme, toggle } = useTheme()
+  const isMobile = useIsMobile()
+
+  // Close drawer on route change (mobile)
+  useEffect(() => { setDrawerOpen(false) }, [location.pathname])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate('/login')
   }
 
-  const btnBase = (color?: string): React.CSSProperties => ({
+  // On mobile, the sidebar is always expanded (no collapse); collapse only applies to desktop
+  const isCollapsed = !isMobile && collapsed
+
+  const btnBase = (): React.CSSProperties => ({
     display: 'flex', alignItems: 'center', gap: 8,
-    padding: collapsed ? '7px 0' : '7px 10px',
-    justifyContent: collapsed ? 'center' : 'flex-start',
+    padding: isCollapsed ? '7px 0' : '7px 10px',
+    justifyContent: isCollapsed ? 'center' : 'flex-start',
     borderRadius: 6, background: 'transparent', border: 'none',
-    color: color ?? t.textGhost, cursor: 'pointer', width: '100%', fontSize: 13,
+    color: t.textGhost, cursor: 'pointer', width: '100%', fontSize: 13,
     transition: 'all 0.1s', whiteSpace: 'nowrap' as const,
   })
 
-  return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
-      {/* Sidebar */}
-      <aside style={{ width: collapsed ? 52 : 220, transition: 'width 0.2s ease', background: t.surface, borderRight: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0, overflow: 'hidden' }}>
-
-        {/* Logo */}
-        <div style={{ height: 52, display: 'flex', alignItems: 'center', padding: collapsed ? '0' : '0 16px', justifyContent: collapsed ? 'center' : 'flex-start', borderBottom: `1px solid ${t.border}`, gap: 10 }}>
-          <div style={{ width: 24, height: 24, borderRadius: 6, background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="12" height="12" fill="none" stroke="white" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          {!collapsed && <span style={{ color: t.text, fontSize: 13, fontWeight: 600, letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>Suryoyo Sat</span>}
+  const sidebar = (
+    <aside style={{
+      width: isMobile ? 240 : (collapsed ? 52 : 220),
+      transition: 'width 0.2s ease',
+      background: t.surface,
+      borderRight: `1px solid ${t.border}`,
+      display: 'flex', flexDirection: 'column', flexShrink: 0, overflow: 'hidden',
+      height: '100%',
+      ...(isMobile ? { position: 'fixed' as const, top: 0, left: 0, zIndex: 100, transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.2s ease', boxShadow: drawerOpen ? '0 0 40px rgba(0,0,0,0.4)' : 'none' } : {}),
+    }}>
+      {/* Logo */}
+      <div style={{ height: 52, display: 'flex', alignItems: 'center', padding: isCollapsed ? '0' : '0 16px', justifyContent: isCollapsed ? 'center' : 'flex-start', borderBottom: `1px solid ${t.border}`, gap: 10 }}>
+        <div style={{ width: 24, height: 24, borderRadius: 6, background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg width="12" height="12" fill="none" stroke="white" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
+        {!isCollapsed && <span style={{ color: t.text, fontSize: 13, fontWeight: 600, letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>Suryoyo Sat</span>}
+      </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {nav.map(({ to, label, icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              style={({ isActive }) => ({
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: collapsed ? '7px 0' : '7px 10px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: 6, textDecoration: 'none', fontSize: 13,
-                fontWeight: isActive ? 500 : 400,
-                color: isActive ? t.navActiveText : t.navText,
-                background: isActive ? t.navActive : 'transparent',
-                transition: 'all 0.1s', whiteSpace: 'nowrap',
-              })}
-            >
-              {icon}
-              {!collapsed && label}
-            </NavLink>
-          ))}
-        </nav>
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {nav.map(({ to, label, icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: isCollapsed ? '7px 0' : '7px 10px',
+              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              borderRadius: 6, textDecoration: 'none', fontSize: 13,
+              fontWeight: isActive ? 500 : 400,
+              color: isActive ? t.navActiveText : t.navText,
+              background: isActive ? t.navActive : 'transparent',
+              transition: 'all 0.1s', whiteSpace: 'nowrap',
+            })}
+          >
+            {icon}
+            {!isCollapsed && label}
+          </NavLink>
+        ))}
+      </nav>
 
-        {/* Bottom */}
-        <div style={{ padding: '8px 6px', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {/* Theme toggle */}
-          <button onClick={toggle} style={btnBase()}>
-            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-            {!collapsed && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}
-          </button>
+      {/* Bottom */}
+      <div style={{ padding: '8px 6px', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <button onClick={toggle} style={btnBase()}>
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          {!isCollapsed && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}
+        </button>
+        {!isMobile && (
           <button onClick={() => setCollapsed(!collapsed)} style={btnBase()}>
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {collapsed ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5l7 7-7 7" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 19l-7-7 7-7" />}
             </svg>
-            {!collapsed && <span>Collapse</span>}
+            {!isCollapsed && <span>Collapse</span>}
           </button>
-          <button
-            onClick={handleLogout}
-            style={btnBase()}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = t.dangerText; (e.currentTarget as HTMLElement).style.background = t.danger }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = t.textGhost; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-          >
-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            {!collapsed && <span>Log out</span>}
-          </button>
-        </div>
-      </aside>
+        )}
+        <button
+          onClick={handleLogout}
+          style={btnBase()}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = t.dangerText; (e.currentTarget as HTMLElement).style.background = t.danger }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = t.textGhost; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+        >
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          {!isCollapsed && <span>Log out</span>}
+        </button>
+      </div>
+    </aside>
+  )
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
+      {sidebar}
+
+      {/* Mobile backdrop */}
+      {isMobile && drawerOpen && (
+        <div onClick={() => setDrawerOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99, animation: 'fadeIn 0.15s ease' }} />
+      )}
 
       {/* Main */}
-      <main style={{ flex: 1, overflowY: 'auto', background: t.bg }}>
+      <main style={{ flex: 1, overflowY: 'auto', background: t.bg, width: '100%' }}>
+        {/* Mobile top bar */}
+        {isMobile && (
+          <div style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', gap: 12, height: 52, padding: '0 16px', background: t.surface, borderBottom: `1px solid ${t.border}` }}>
+            <button onClick={() => setDrawerOpen(true)} style={{ background: 'transparent', border: 'none', color: t.textSub, cursor: 'pointer', display: 'flex', padding: 4 }}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+            <span style={{ color: t.text, fontSize: 14, fontWeight: 600 }}>Suryoyo Sat</span>
+          </div>
+        )}
         <Outlet />
       </main>
+
+      <CommandPalette />
     </div>
   )
 }

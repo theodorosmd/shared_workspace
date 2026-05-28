@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
+import { useFeedback } from '@/lib/feedback'
 import { PageHeader } from '@/components/ui'
 
 interface Profile { id: string; email: string; full_name: string; role: string; created_at: string }
@@ -8,6 +9,7 @@ interface Profile { id: string; email: string; full_name: string; role: string; 
 
 export default function Users() {
   const { t } = useTheme()
+  const { toast } = useFeedback()
   const [users, setUsers] = useState<Profile[]>([])
   const [filtered, setFiltered] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
@@ -15,7 +17,10 @@ export default function Users() {
 
   useEffect(() => {
     supabase.from('profiles').select('*').order('created_at', { ascending: false })
-      .then(({ data: u }) => { setUsers(u ?? []); setFiltered(u ?? []); setLoading(false) })
+      .then(({ data: u, error }) => {
+        if (error) toast(error.message, 'error')
+        setUsers(u ?? []); setFiltered(u ?? []); setLoading(false)
+      })
   }, [])
 
   useEffect(() => {
@@ -24,12 +29,15 @@ export default function Users() {
   }, [search, users])
 
   const changeRole = async (id: string, role: string) => {
-    await supabase.from('profiles').update({ role }).eq('id', id)
+    const prev = users
     setUsers(p => p.map(u => u.id === id ? { ...u, role } : u))
+    const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
+    if (error) { toast(error.message, 'error'); setUsers(prev); return }
+    toast('Role updated')
   }
 
   return (
-    <div style={{ minHeight: '100%', background: t.bg, padding: 48, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
+    <div className="page" style={{ minHeight: '100%', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
       <PageHeader title="Users" sub="Manage platform users" />
 
       {/* Search */}
@@ -44,8 +52,8 @@ export default function Users() {
       {loading ? (
         <div style={{ padding: '48px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>Loading…</div>
       ) : (
-        <div style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 10, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <div className="table-wrap" style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 10, overflow: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 480 }}>
             <thead>
               <tr>
                 {['User', 'Role', 'Joined'].map(h => (

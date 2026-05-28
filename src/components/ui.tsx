@@ -46,18 +46,19 @@ export function Table({ cols, rows, loading, empty }: { cols: string[]; rows: Re
   )
 }
 
-export function Modal({ title, children, onClose, onSave, saveLabel = 'Save' }: { title: string; children: React.ReactNode; onClose: () => void; onSave: () => void; saveLabel?: string }) {
+export function Modal({ title, children, onClose, onSave, saveLabel = 'Save', saving }: { title: string; children: React.ReactNode; onClose: () => void; onSave: () => void; saveLabel?: string; saving?: boolean }) {
   const { t } = useTheme()
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
-      <div style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 12, width: '100%', maxWidth: 440, padding: 24, maxHeight: '90vh', overflowY: 'auto' }}>
+    <div data-overlay style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16, animation: 'fadeIn 0.15s ease' }}
+      onClick={() => !saving && onClose()}>
+      <div onClick={e => e.stopPropagation()} style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 12, width: '100%', maxWidth: 440, padding: 24, maxHeight: '90vh', overflowY: 'auto' }}>
         <h2 style={{ color: t.text, fontSize: 16, fontWeight: 600, margin: '0 0 20px', letterSpacing: '-0.2px' }}>{title}</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {children}
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '9px', borderRadius: 7, border: `1px solid ${t.borderStrong}`, background: 'transparent', color: t.textSub, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
-          <button onClick={onSave} style={{ flex: 1, padding: '9px', borderRadius: 7, border: 'none', background: '#2563eb', color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>{saveLabel}</button>
+          <button onClick={onClose} disabled={saving} style={{ flex: 1, padding: '9px', borderRadius: 7, border: `1px solid ${t.borderStrong}`, background: 'transparent', color: t.textSub, fontSize: 13, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.5 : 1 }}>Cancel</button>
+          <button onClick={onSave} disabled={saving} style={{ flex: 1, padding: '9px', borderRadius: 7, border: 'none', background: saving ? '#1d4ed8' : '#2563eb', color: 'white', fontSize: 13, fontWeight: 500, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving…' : saveLabel}</button>
         </div>
       </div>
     </div>

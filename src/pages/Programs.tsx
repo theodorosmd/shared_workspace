@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
+import { useFeedback } from '@/lib/feedback'
 import { PageHeader, Modal, Field } from '@/components/ui'
 
 interface Program { id: string; title: string; description: string; file_url: string; created_at: string }
 
 export default function Programs() {
   const { t } = useTheme()
+  const { toast, confirm } = useFeedback()
   const [programs, setPrograms] = useState<Program[]>([])
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
@@ -16,33 +18,40 @@ export default function Programs() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const fetch = async () => {
-    const { data } = await supabase.from('programs').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('programs').select('*').order('created_at', { ascending: false })
+    if (error) toast(error.message, 'error')
     setPrograms(data ?? []); setLoading(false)
   }
   useEffect(() => { fetch() }, [])
 
   const upload = async () => {
-    if (!form.title || !file) return
+    if (!form.title.trim()) { toast('Title is required', 'error'); return }
+    if (!file) { toast('Please select a file', 'error'); return }
     setUploading(true)
     const ext = file.name.split('.').pop()
     const path = `programs/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('programs').upload(path, file)
-    if (!error) {
-      const { data: { publicUrl } } = supabase.storage.from('programs').getPublicUrl(path)
-      await supabase.from('programs').insert({ ...form, file_url: publicUrl })
-    }
-    setUploading(false); setOpen(false); setForm({ title: '', description: '' }); setFile(null); fetch()
+    const { error: upErr } = await supabase.storage.from('programs').upload(path, file)
+    if (upErr) { setUploading(false); toast(upErr.message, 'error'); return }
+    const { data: { publicUrl } } = supabase.storage.from('programs').getPublicUrl(path)
+    const { error: insErr } = await supabase.from('programs').insert({ ...form, file_url: publicUrl })
+    setUploading(false)
+    if (insErr) { toast(insErr.message, 'error'); return }
+    toast('Program uploaded')
+    setOpen(false); setForm({ title: '', description: '' }); setFile(null); fetch()
   }
 
-  const remove = async (id: string, fileUrl: string) => {
-    if (!confirm('Delete?')) return
-    const path = fileUrl.split('/programs/')[1]
-    await supabase.storage.from('programs').remove([`programs/${path}`])
-    await supabase.from('programs').delete().eq('id', id); fetch()
+  const remove = async (p: Program) => {
+    const ok = await confirm({ title: 'Delete program', message: `Delete “${p.title}”?`, danger: true, confirmLabel: 'Delete' })
+    if (!ok) return
+    const path = p.file_url?.split('/programs/')[1]
+    if (path) await supabase.storage.from('programs').remove([`programs/${path}`])
+    const { error } = await supabase.from('programs').delete().eq('id', p.id)
+    if (error) { toast(error.message, 'error'); return }
+    toast('Program deleted'); fetch()
   }
 
   return (
-    <div style={{ minHeight: '100%', background: t.bg, padding: 48, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
+    <div className="page" style={{ minHeight: '100%', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
       <PageHeader title="Programs" sub="Manage uploaded programs" action="Upload" onAction={() => setOpen(true)} />
 
       {loading ? (
@@ -50,7 +59,7 @@ export default function Programs() {
       ) : programs.length === 0 ? (
         <div style={{ padding: '64px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>No programs yet.</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+        <div className="cards-grid">
           {programs.map(p => (
             <div key={p.id} style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 10, padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -59,7 +68,7 @@ export default function Programs() {
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   {p.file_url && <a href={p.file_url} target="_blank" rel="noreferrer" style={{ color: t.textMuted, fontSize: 11 }}>↗</a>}
-                  <button onClick={() => remove(p.id, p.file_url)} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: 12 }}>✕</button>
+                  <button onClick={() => remove(p)} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: 12 }}>✕</button>
                 </div>
               </div>
               <p style={{ color: t.text, fontWeight: 500, fontSize: 14, margin: '0 0 4px' }}>{p.title}</p>
@@ -71,7 +80,7 @@ export default function Programs() {
       )}
 
       {open && (
-        <Modal title="Upload Program" onClose={() => { setOpen(false); setFile(null) }} onSave={upload} saveLabel={uploading ? 'Uploading…' : 'Upload'}>
+        <Modal title="Upload Program" onClose={() => { setOpen(false); setFile(null) }} onSave={upload} saving={uploading} saveLabel="Upload">
           <Field label="Title" value={form.title} onChange={v => setForm({ ...form, title: v })} />
           <Field label="Description" value={form.description} onChange={v => setForm({ ...form, description: v })} multiline />
           <div>

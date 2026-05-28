@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
+import { useFeedback } from '@/lib/feedback'
 import { PageHeader, Modal, Field, ActionBtn } from '@/components/ui'
 
 interface Role { id: string; name: string; description: string; permissions: string[] }
@@ -9,14 +10,17 @@ const ALL = ['view_dashboard','manage_users','manage_countries','upload_programs
 
 export default function Roles() {
   const { t } = useTheme()
+  const { toast, confirm } = useFeedback()
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState<Role | null>(null)
   const [form, setForm] = useState({ name: '', description: '', permissions: [] as string[] })
 
   const fetch = async () => {
-    const { data } = await supabase.from('roles').select('*').order('name')
+    const { data, error } = await supabase.from('roles').select('*').order('name')
+    if (error) toast(error.message, 'error')
     setRoles(data ?? []); setLoading(false)
   }
   useEffect(() => { fetch() }, [])
@@ -25,27 +29,41 @@ export default function Roles() {
   const openEdit = (r: Role) => { setEditing(r); setForm({ name: r.name, description: r.description, permissions: r.permissions ?? [] }); setOpen(true) }
   const toggle = (p: string) => setForm(f => ({ ...f, permissions: f.permissions.includes(p) ? f.permissions.filter(x => x !== p) : [...f.permissions, p] }))
   const save = async () => {
-    if (editing) await supabase.from('roles').update(form).eq('id', editing.id)
-    else await supabase.from('roles').insert(form)
+    if (!form.name.trim()) { toast('Role name is required', 'error'); return }
+    setSaving(true)
+    const { error } = editing
+      ? await supabase.from('roles').update(form).eq('id', editing.id)
+      : await supabase.from('roles').insert(form)
+    setSaving(false)
+    if (error) { toast(error.message, 'error'); return }
+    toast(editing ? 'Role updated' : 'Role created')
     setOpen(false); fetch()
   }
-  const remove = async (id: string) => { if (!confirm('Delete?')) return; await supabase.from('roles').delete().eq('id', id); fetch() }
+  const remove = async (r: Role) => {
+    const ok = await confirm({ title: 'Delete role', message: `Delete the “${r.name}” role?`, danger: true, confirmLabel: 'Delete' })
+    if (!ok) return
+    const { error } = await supabase.from('roles').delete().eq('id', r.id)
+    if (error) { toast(error.message, 'error'); return }
+    toast('Role deleted'); fetch()
+  }
 
   return (
-    <div style={{ minHeight: '100%', background: t.bg, padding: 48, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
+    <div className="page" style={{ minHeight: '100%', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
       <PageHeader title="Settings — Roles" sub="Define roles and permissions" action="New Role" onAction={openNew} />
 
       {loading ? (
         <div style={{ padding: '48px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>Loading…</div>
+      ) : roles.length === 0 ? (
+        <div style={{ padding: '64px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>No roles yet.</div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+        <div className="cards-grid">
           {roles.map(r => (
             <div key={r.id} style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 10, padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <p style={{ color: t.text, fontWeight: 600, fontSize: 14, margin: 0, textTransform: 'capitalize' }}>{r.name}</p>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <ActionBtn onClick={() => openEdit(r)} label="Edit" />
-                  <ActionBtn onClick={() => remove(r.id)} label="Delete" danger />
+                  <ActionBtn onClick={() => remove(r)} label="Delete" danger />
                 </div>
               </div>
               <p style={{ color: t.textMuted, fontSize: 12, margin: '0 0 12px' }}>{r.description}</p>
@@ -62,7 +80,7 @@ export default function Roles() {
       )}
 
       {open && (
-        <Modal title={editing ? 'Edit Role' : 'New Role'} onClose={() => setOpen(false)} onSave={save} saveLabel={editing ? 'Save' : 'Create'}>
+        <Modal title={editing ? 'Edit Role' : 'New Role'} onClose={() => setOpen(false)} onSave={save} saving={saving} saveLabel={editing ? 'Save' : 'Create'}>
           <Field label="Name" value={form.name} onChange={v => setForm({ ...form, name: v })} />
           <Field label="Description" value={form.description} onChange={v => setForm({ ...form, description: v })} multiline />
           <div>

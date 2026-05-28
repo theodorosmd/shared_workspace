@@ -7,7 +7,64 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive layout utilities */
+.page {
+  padding: 48px;
+}
+@media (max-width: 768px) {
+  .page { padding: 24px 16px; }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.split {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+@media (max-width: 768px) {
+  .split { flex-direction: column; }
+  .split > .detail-panel { width: 100% !important; position: static !important; }
 }

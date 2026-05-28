@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { isMisconfigured } from './lib/supabase.ts'
 import { ThemeProvider } from './lib/theme.tsx'
+import { FeedbackProvider } from './lib/feedback.tsx'
 
 function MissingConfig() {
   return (
@@ -24,7 +25,9 @@ function MissingConfig() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      {isMisconfigured ? <MissingConfig /> : <App />}
+      <FeedbackProvider>
+        {isMisconfigured ? <MissingConfig /> : <App />}
+      </FeedbackProvider>
     </ThemeProvider>
   </StrictMode>,
 )
