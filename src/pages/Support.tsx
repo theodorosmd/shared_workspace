@@ -1,220 +1,115 @@
 import { useEffect, useState } from 'react'
-import { LifeBuoy, Plus, MessageSquare } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/lib/theme'
+import { PageHeader, Modal, Field, Select } from '@/components/ui'
 
-interface Ticket {
-  id: string
-  subject: string
-  message: string
-  status: 'open' | 'in_progress' | 'resolved'
-  priority: 'low' | 'medium' | 'high'
-  employee_email: string
-  created_at: string
-}
+interface Ticket { id: string; subject: string; message: string; status: 'open' | 'in_progress' | 'resolved'; priority: 'low' | 'medium' | 'high'; employee_email: string; created_at: string }
 
-const STATUS_STYLES: Record<string, string> = {
-  open: 'bg-amber-100 text-amber-700',
-  in_progress: 'bg-blue-100 text-blue-700',
-  resolved: 'bg-emerald-100 text-emerald-700',
-}
+const STATUS_COLOR: Record<string, string> = { open: 'amber', in_progress: 'blue', resolved: 'green' }
+const PRIORITY_COLOR: Record<string, string> = { low: 'slate', medium: 'amber', high: 'red' }
 
-const PRIORITY_STYLES: Record<string, string> = {
-  low: 'bg-slate-100 text-slate-600',
-  medium: 'bg-orange-100 text-orange-700',
-  high: 'bg-red-100 text-red-700',
+function Dot({ color }: { color: string }) {
+  const map: Record<string, string> = { amber: '#fbbf24', blue: '#60a5fa', green: '#4ade80', red: '#f87171', slate: '#94a3b8' }
+  return <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: map[color] ?? map.slate, marginRight: 5 }} />
 }
 
 export default function Support() {
+  const { t } = useTheme()
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<string>('all')
+  const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState<Ticket | null>(null)
-  const [showNew, setShowNew] = useState(false)
+  const [open, setOpen] = useState(false)
   const [form, setForm] = useState({ subject: '', message: '', priority: 'medium', employee_email: '' })
 
-  const fetchTickets = async () => {
-    let query = supabase.from('support_tickets').select('*').order('created_at', { ascending: false })
-    if (filter !== 'all') query = query.eq('status', filter)
-    const { data } = await query
-    setTickets(data ?? [])
-    setLoading(false)
+  const fetch = async () => {
+    let q = supabase.from('support_tickets').select('*').order('created_at', { ascending: false })
+    if (filter !== 'all') q = q.eq('status', filter)
+    const { data } = await q; setTickets(data ?? []); setLoading(false)
   }
+  useEffect(() => { fetch() }, [filter])
 
-  useEffect(() => { fetchTickets() }, [filter])
-
-  const handleStatusChange = async (id: string, status: string) => {
+  const changeStatus = async (id: string, status: string) => {
     await supabase.from('support_tickets').update({ status }).eq('id', id)
-    setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status: status as Ticket['status'] } : t)))
-    if (selected?.id === id) setSelected((t) => t ? { ...t, status: status as Ticket['status'] } : t)
+    setTickets(p => p.map(t => t.id === id ? { ...t, status: status as Ticket['status'] } : t))
+    if (selected?.id === id) setSelected(s => s ? { ...s, status: status as Ticket['status'] } : s)
   }
 
-  const handleCreate = async () => {
+  const create = async () => {
     await supabase.from('support_tickets').insert({ ...form, status: 'open' })
-    setShowNew(false)
-    setForm({ subject: '', message: '', priority: 'medium', employee_email: '' })
-    fetchTickets()
+    setOpen(false); setForm({ subject: '', message: '', priority: 'medium', employee_email: '' }); fetch()
   }
+
+  const filters = ['all', 'open', 'in_progress', 'resolved']
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Support Tickets</h1>
-          <p className="text-slate-500 mt-1">Employee support requests</p>
-        </div>
-        <button
-          onClick={() => setShowNew(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Ticket
-        </button>
-      </div>
+    <div style={{ minHeight: '100%', background: t.bg, padding: 48, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
+      <PageHeader title="Support" sub="Employee support tickets" action="New Ticket" onAction={() => setOpen(true)} />
 
       {/* Filter tabs */}
-      <div className="flex gap-2 mb-6">
-        {['all', 'open', 'in_progress', 'resolved'].map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`px-4 py-1.5 text-sm rounded-full font-medium transition-colors ${
-              filter === s
-                ? 'bg-slate-900 text-white'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {s === 'all' ? 'All' : s.replace('_', ' ')}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
+        {filters.map(f => (
+          <button key={f} onClick={() => setFilter(f)} style={{
+            padding: '5px 12px', borderRadius: 6, border: `1px solid ${filter === f ? '#2563eb' : t.borderStrong}`,
+            background: filter === f ? '#2563eb' : 'transparent', color: filter === f ? 'white' : t.textMuted,
+            fontSize: 12, cursor: 'pointer', transition: 'all 0.1s', fontWeight: filter === f ? 500 : 400,
+          }}>
+            {f === 'all' ? 'All' : f.replace('_', ' ')}
           </button>
         ))}
       </div>
 
-      <div className="flex gap-6">
-        {/* Ticket list */}
-        <div className="flex-1 space-y-3">
+      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+        {/* List */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {loading ? (
-            <div className="p-12 text-center text-slate-400">Loading...</div>
+            <div style={{ padding: '48px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>Loading…</div>
           ) : tickets.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-              <LifeBuoy className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">No tickets found.</p>
-            </div>
-          ) : (
-            tickets.map((t) => (
-              <div
-                key={t.id}
-                onClick={() => setSelected(t)}
-                className={`bg-white rounded-xl border p-4 cursor-pointer transition-colors ${
-                  selected?.id === t.id
-                    ? 'border-blue-400 ring-1 ring-blue-400'
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 truncate">{t.subject}</p>
-                    <p className="text-sm text-slate-500 truncate mt-0.5">{t.employee_email}</p>
-                  </div>
-                  <div className="flex gap-1.5 shrink-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_STYLES[t.priority]}`}>
-                      {t.priority}
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[t.status]}`}>
-                      {t.status.replace('_', ' ')}
-                    </span>
-                  </div>
+            <div style={{ padding: '48px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>No tickets.</div>
+          ) : tickets.map(tk => (
+            <div key={tk.id} onClick={() => setSelected(tk)} style={{
+              background: selected?.id === tk.id ? t.surface : t.bg,
+              border: `1px solid ${selected?.id === tk.id ? '#2563eb44' : t.borderStrong}`,
+              borderRadius: 8, padding: '14px 16px', cursor: 'pointer', transition: 'all 0.1s',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ color: t.text, fontWeight: 500, fontSize: 13, margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tk.subject}</p>
+                  <p style={{ color: t.textMuted, fontSize: 11, margin: 0 }}>{tk.employee_email}</p>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
-                  {new Date(t.created_at).toLocaleString()}
-                </p>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, color: t.textMuted }}>
+                    <Dot color={PRIORITY_COLOR[tk.priority]} />{tk.priority}
+                  </span>
+                  <span style={{ fontSize: 11, color: t.textMuted }}>
+                    <Dot color={STATUS_COLOR[tk.status]} />{tk.status.replace('_', ' ')}
+                  </span>
+                </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
 
-        {/* Detail panel */}
+        {/* Detail */}
         {selected && (
-          <div className="w-96 shrink-0 bg-white rounded-xl border border-slate-200 p-6 h-fit sticky top-8">
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="w-5 h-5 text-slate-600" />
-              <h2 className="font-semibold text-slate-900">Ticket Detail</h2>
-            </div>
-            <h3 className="font-medium text-slate-900 mb-1">{selected.subject}</h3>
-            <p className="text-sm text-slate-500 mb-1">{selected.employee_email}</p>
-            <p className="text-sm text-slate-700 mt-4 mb-6">{selected.message}</p>
-            <div>
-              <label className="block text-xs font-medium text-slate-500 mb-1.5">Change Status</label>
-              <select
-                value={selected.status}
-                onChange={(e) => handleStatusChange(selected.id, e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="open">Open</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-              </select>
-            </div>
+          <div style={{ width: 320, flexShrink: 0, background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 10, padding: 20, position: 'sticky', top: 0 }}>
+            <p style={{ color: t.text, fontWeight: 600, fontSize: 14, margin: '0 0 4px' }}>{selected.subject}</p>
+            <p style={{ color: t.textMuted, fontSize: 11, margin: '0 0 16px' }}>{selected.employee_email}</p>
+            <p style={{ color: t.textSub, fontSize: 13, margin: '0 0 20px', lineHeight: 1.6 }}>{selected.message}</p>
+            <Select label="Status" value={selected.status} onChange={v => changeStatus(selected.id, v)}
+              options={[{ value: 'open', label: 'Open' }, { value: 'in_progress', label: 'In Progress' }, { value: 'resolved', label: 'Resolved' }]} />
           </div>
         )}
       </div>
 
-      {/* New Ticket Modal */}
-      {showNew && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-5">New Ticket</h2>
-            <div className="space-y-4">
-              {[
-                { label: 'Employee Email', field: 'employee_email', type: 'email' },
-                { label: 'Subject', field: 'subject', type: 'text' },
-              ].map(({ label, field, type }) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
-                  <input
-                    type={type}
-                    value={form[field as keyof typeof form]}
-                    onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Message</label>
-                <textarea
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Priority</label>
-                <select
-                  value={form.priority}
-                  onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowNew(false)}
-                className="flex-1 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreate}
-                className="flex-1 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
-              >
-                Create Ticket
-              </button>
-            </div>
-          </div>
-        </div>
+      {open && (
+        <Modal title="New Ticket" onClose={() => setOpen(false)} onSave={create} saveLabel="Create">
+          <Field label="Employee Email" value={form.employee_email} onChange={v => setForm({ ...form, employee_email: v })} type="email" />
+          <Field label="Subject" value={form.subject} onChange={v => setForm({ ...form, subject: v })} />
+          <Field label="Message" value={form.message} onChange={v => setForm({ ...form, message: v })} multiline />
+          <Select label="Priority" value={form.priority} onChange={v => setForm({ ...form, priority: v })}
+            options={[{ value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }]} />
+        </Modal>
       )}
     </div>
   )

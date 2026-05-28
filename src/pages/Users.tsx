@@ -1,128 +1,85 @@
 import { useEffect, useState } from 'react'
-import { Users as UsersIcon, Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/lib/theme'
+import { PageHeader } from '@/components/ui'
 
-interface Profile {
-  id: string
-  email: string
-  full_name: string
-  role: string
-  created_at: string
-}
+interface Profile { id: string; email: string; full_name: string; role: string; created_at: string }
 
-const ROLE_COLORS: Record<string, string> = {
-  admin: 'bg-red-100 text-red-700',
-  manager: 'bg-violet-100 text-violet-700',
-  employee: 'bg-blue-100 text-blue-700',
-  viewer: 'bg-slate-100 text-slate-600',
-}
 
 export default function Users() {
+  const { t } = useTheme()
   const [users, setUsers] = useState<Profile[]>([])
   const [filtered, setFiltered] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .then(({ data: users }) => {
-        setUsers(users ?? [])
-        setFiltered(users ?? [])
-        setLoading(false)
-      })
+    supabase.from('profiles').select('*').order('created_at', { ascending: false })
+      .then(({ data: u }) => { setUsers(u ?? []); setFiltered(u ?? []); setLoading(false) })
   }, [])
 
   useEffect(() => {
     const q = search.toLowerCase()
-    setFiltered(
-      users.filter(
-        (u) =>
-          u.full_name?.toLowerCase().includes(q) ||
-          u.email?.toLowerCase().includes(q) ||
-          u.role?.toLowerCase().includes(q)
-      )
-    )
+    setFiltered(users.filter(u => u.full_name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.role?.toLowerCase().includes(q)))
   }, [search, users])
 
-  const handleRoleChange = async (id: string, role: string) => {
+  const changeRole = async (id: string, role: string) => {
     await supabase.from('profiles').update({ role }).eq('id', id)
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role } : u)))
+    setUsers(p => p.map(u => u.id === id ? { ...u, role } : u))
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Users</h1>
-          <p className="text-slate-500 mt-1">Manage all platform users</p>
-        </div>
-      </div>
+    <div style={{ minHeight: '100%', background: t.bg, padding: 48, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
+      <PageHeader title="Users" sub="Manage platform users" />
 
       {/* Search */}
-      <div className="relative mb-6 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email or role..."
-          className="w-full pl-9 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      <div style={{ position: 'relative', maxWidth: 300, marginBottom: 24 }}>
+        <svg style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: t.textMuted }} width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+          style={{ width: '100%', padding: '8px 12px 8px 32px', background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.inputText, fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+          onFocus={e => (e.target.style.borderColor = '#3b82f6')}
+          onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200">
-        {loading ? (
-          <div className="p-12 text-center text-slate-400">Loading...</div>
-        ) : filtered.length === 0 ? (
-          <div className="p-12 text-center">
-            <UsersIcon className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">No users found.</p>
-          </div>
-        ) : (
-          <table className="w-full text-sm">
+      {loading ? (
+        <div style={{ padding: '48px 0', textAlign: 'center', color: t.textMuted, fontSize: 13 }}>Loading…</div>
+      ) : (
+        <div style={{ background: t.surface, border: `1px solid ${t.borderStrong}`, borderRadius: 10, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr className="border-b border-slate-100">
-                <th className="text-left px-6 py-3 text-slate-500 font-medium">User</th>
-                <th className="text-left px-6 py-3 text-slate-500 font-medium">Role</th>
-                <th className="text-left px-6 py-3 text-slate-500 font-medium">Joined</th>
+              <tr>
+                {['User', 'Role', 'Joined'].map(h => (
+                  <th key={h} style={{ textAlign: 'left', padding: '11px 18px', color: t.textMuted, fontWeight: 500, borderBottom: `1px solid ${t.border}`, fontSize: 12 }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map((u) => (
-                <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-xs shrink-0">
+              {filtered.map(u => (
+                <tr key={u.id} style={{ borderBottom: `1px solid ${t.border}` }}>
+                  <td style={{ padding: '12px 18px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#2563eb22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
                         {(u.full_name || u.email || '?')[0].toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">{u.full_name || '—'}</p>
-                        <p className="text-slate-400 text-xs">{u.email}</p>
+                        <p style={{ color: t.text, fontWeight: 500, margin: 0 }}>{u.full_name || '—'}</p>
+                        <p style={{ color: t.textMuted, fontSize: 11, margin: 0 }}>{u.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={u.role || 'viewer'}
-                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      className={`text-xs font-medium px-2 py-1 rounded-full border-0 cursor-pointer focus:outline-none ${ROLE_COLORS[u.role] || ROLE_COLORS.viewer}`}
-                    >
-                      {['admin', 'manager', 'employee', 'viewer'].map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
+                  <td style={{ padding: '12px 18px' }}>
+                    <select value={u.role || 'viewer'} onChange={e => changeRole(u.id, e.target.value)}
+                      style={{ padding: '3px 8px', background: t.input, border: `1px solid ${t.borderStrong}`, borderRadius: 5, color: t.text, fontSize: 12, cursor: 'pointer', outline: 'none' }}>
+                      {['admin', 'manager', 'employee', 'viewer'].map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </td>
-                  <td className="px-6 py-4 text-slate-500">
-                    {new Date(u.created_at).toLocaleDateString()}
-                  </td>
+                  <td style={{ padding: '12px 18px', color: t.textMuted }}>{new Date(u.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
