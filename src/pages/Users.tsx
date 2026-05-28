@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users as UsersIcon, Search, Shield } from 'lucide-react'
+import { Users as UsersIcon, Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface Profile {
@@ -28,9 +28,9 @@ export default function Users() {
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setUsers(data ?? [])
-        setFiltered(data ?? [])
+      .then(({ data: users }) => {
+        setUsers(users ?? [])
+        setFiltered(users ?? [])
         setLoading(false)
       })
   }, [])
