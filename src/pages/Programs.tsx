@@ -40,7 +40,7 @@ export default function Programs() {
   const thumbRef = useRef<HTMLInputElement>(null)
 
   const loadPrograms = async () => {
-    const { data, error } = await supabase.from('programs').select('*, countries(name, code)').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('programs').select('*, countries(name, code)').order('created_at', { ascending: false }).limit(500)
     if (error) toast(error.message, 'error')
     setPrograms(data ?? []); setLoading(false)
   }

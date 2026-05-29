@@ -65,7 +65,7 @@ export function Modal({ title, children, onClose, onSave, saveLabel = 'Save', sa
   )
 }
 
-export function Field({ label, value, onChange, placeholder, type = 'text', multiline }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; multiline?: boolean }) {
+export function Field({ label, value, onChange, placeholder, type = 'text', multiline, maxLength }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; multiline?: boolean; maxLength?: number }) {
   const { t } = useTheme()
   const base: React.CSSProperties = {
     width: '100%', padding: '9px 12px', background: t.input,
@@ -77,10 +77,10 @@ export function Field({ label, value, onChange, placeholder, type = 'text', mult
     <div>
       <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: t.textMuted, marginBottom: 6, letterSpacing: '0.02em' }}>{label}</label>
       {multiline
-        ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3} style={{ ...base, resize: 'none' }}
+        ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3} maxLength={maxLength ?? 2000} style={{ ...base, resize: 'none' }}
             onFocus={e => (e.target.style.borderColor = '#3b82f6')}
             onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
-        : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={base}
+        : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength ?? (type === 'email' ? 254 : 500)} style={base}
             onFocus={e => (e.target.style.borderColor = '#3b82f6')}
             onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
       }

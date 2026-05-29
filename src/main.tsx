@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import ErrorBoundary from './components/ErrorBoundary.tsx'
 import { isMisconfigured } from './lib/supabase.ts'
 import { ThemeProvider } from './lib/theme.tsx'
 import { FeedbackProvider } from './lib/feedback.tsx'
@@ -24,10 +25,12 @@ function MissingConfig() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <FeedbackProvider>
-        {isMisconfigured ? <MissingConfig /> : <App />}
-      </FeedbackProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <FeedbackProvider>
+          {isMisconfigured ? <MissingConfig /> : <App />}
+        </FeedbackProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

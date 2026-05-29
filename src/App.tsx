@@ -17,23 +17,18 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
+        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="countries" element={<Countries />} />
-          <Route path="users" element={<Users />} />
           <Route path="programs" element={<Programs />} />
-          <Route path="settings/roles" element={<Roles />} />
           <Route path="support" element={<Support />} />
-          <Route path="audit" element={<AuditLog />} />
-          <Route path="channels" element={<Channels />} />
           <Route path="profile" element={<Profile />} />
+          {/* manager+ */}
+          <Route path="users" element={<ProtectedRoute minRole="manager"><Users /></ProtectedRoute>} />
+          <Route path="channels" element={<ProtectedRoute minRole="manager"><Channels /></ProtectedRoute>} />
+          {/* admin+ */}
+          <Route path="settings/roles" element={<ProtectedRoute minRole="admin"><Roles /></ProtectedRoute>} />
+          <Route path="audit" element={<ProtectedRoute minRole="admin"><AuditLog /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

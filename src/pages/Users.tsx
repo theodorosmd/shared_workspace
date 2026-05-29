@@ -57,7 +57,7 @@ export default function Users() {
   }, [])
 
   const loadUsers = async () => {
-    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500)
     if (error) toast(error.message, 'error')
     setUsers(data ?? []); setFiltered(data ?? []); setLoading(false)
   }
@@ -128,7 +128,8 @@ export default function Users() {
 
   const submitInvite = async () => {
     if (!inviteForm.email.trim()) { toast('Email is required', 'error'); return }
-    if (!adminAvailable) { toast('Service key not configured — add VITE_SUPABASE_SERVICE_KEY to Vercel env vars', 'error'); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteForm.email.trim())) { toast('Enter a valid email address', 'error'); return }
+    if (!adminAvailable) { toast('Admin Edge Function not deployed — run: supabase functions deploy admin-ops', 'error'); return }
     setInviting(true)
     try {
       await inviteUser(inviteForm.email.trim(), inviteForm.role)
