@@ -8,6 +8,7 @@ import Users from '@/pages/Users'
 import Roles from '@/pages/Roles'
 import Programs from '@/pages/Programs'
 import Support from '@/pages/Support'
+import AuditLog from '@/pages/AuditLog'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="programs" element={<Programs />} />
           <Route path="settings/roles" element={<Roles />} />
           <Route path="support" element={<Support />} />
+          <Route path="audit" element={<AuditLog />} />
         </Route>
       </Routes>
     </BrowserRouter>

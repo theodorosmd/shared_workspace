@@ -55,6 +55,15 @@ body {
   gap: 12px;
 }
 
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}
+
 .table-wrap {
   overflow-x: auto;
 }
