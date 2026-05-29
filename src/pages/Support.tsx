@@ -43,6 +43,7 @@ export default function Support() {
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ subject: '', message: '', priority: 'medium', employee_email: '' })
+  const [reloadTick, setReloadTick] = useState(0)
   const repliesEndRef = useRef<HTMLDivElement>(null)
 
   const loadTickets = async () => {
@@ -53,7 +54,16 @@ export default function Support() {
     setTickets(data ?? []); setLoading(false)
   }
 
-  useEffect(() => { loadTickets() }, [filter])
+  useEffect(() => { loadTickets() }, [filter, reloadTick])
+
+  useEffect(() => {
+    const channel = supabase.channel('support-tickets-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => {
+        setReloadTick(n => n + 1)
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   useEffect(() => {
     supabase.from('profiles').select('id, email, full_name')

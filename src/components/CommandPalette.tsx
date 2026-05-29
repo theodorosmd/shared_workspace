@@ -37,6 +37,8 @@ export default function CommandPalette() {
     { id: 'roles', label: 'Go to Settings / Roles', key: 'R', group: 'Navigation', run: () => navigate('/settings/roles') },
     { id: 'support', label: 'Go to Support', key: 'S', group: 'Navigation', run: () => navigate('/support') },
     { id: 'audit', label: 'Go to Audit Log', key: 'A', group: 'Navigation', run: () => navigate('/audit') },
+    { id: 'channels', label: 'Go to Channels', key: 'H', group: 'Navigation', run: () => navigate('/channels') },
+    { id: 'profile', label: 'Go to Profile', key: 'O', group: 'Navigation', run: () => navigate('/profile') },
     { id: 'theme', label: theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode', group: 'Actions', run: () => toggle() },
     { id: 'logout', label: 'Log out', group: 'Actions', run: async () => { await supabase.auth.signOut(); navigate('/login') } },
   ]
@@ -67,7 +69,7 @@ export default function CommandPalette() {
       }
       // Single-key shortcuts (only when not typing, no modifier, no open overlay)
       if (!isTyping() && !e.metaKey && !e.ctrlKey && !e.altKey && !document.querySelector('[data-overlay]')) {
-        const map: Record<string, string> = { c: '/countries', p: '/programs', s: '/support', r: '/settings/roles', d: '/', u: '/users', a: '/audit' }
+        const map: Record<string, string> = { c: '/countries', p: '/programs', s: '/support', r: '/settings/roles', d: '/', u: '/users', a: '/audit', h: '/channels', o: '/profile' }
         const dest = map[e.key.toLowerCase()]
         if (dest) { e.preventDefault(); navigate(dest) }
       }

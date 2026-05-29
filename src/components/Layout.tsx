@@ -10,6 +10,7 @@ const nav = [
   { to: '/countries', label: 'Countries', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
   { to: '/users', label: 'Users', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> },
   { to: '/programs', label: 'Programs', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg> },
+  { to: '/channels', label: 'Channels', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 10l4.553-2.069A1 1 0 0121 8.876V15.124a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> },
   { to: '/settings/roles', label: 'Settings', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
   { to: '/support', label: 'Support', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg> },
   { to: '/audit', label: 'Audit Log', icon: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> },
@@ -25,10 +26,19 @@ function SunIcon() {
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [userProfile, setUserProfile] = useState<{ email: string; full_name: string; avatar_url: string | null } | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
   const { t, theme, toggle } = useTheme()
   const isMobile = useIsMobile()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return
+      supabase.from('profiles').select('email, full_name, avatar_url').eq('id', data.user.id).single()
+        .then(({ data: p }) => { if (p) setUserProfile(p) })
+    })
+  }, [])
 
   // Close drawer on route change (mobile)
   useEffect(() => { setDrawerOpen(false) }, [location.pathname])
@@ -96,6 +106,24 @@ export default function Layout() {
 
       {/* Bottom */}
       <div style={{ padding: '8px 6px', borderTop: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {userProfile && (
+          <NavLink to="/profile" style={({ isActive }) => ({
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: isCollapsed ? '7px 0' : '7px 10px',
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            borderRadius: 6, textDecoration: 'none', fontSize: 12,
+            color: isActive ? t.navActiveText : t.textSub,
+            background: isActive ? t.navActive : 'transparent',
+            transition: 'all 0.1s', marginBottom: 2,
+          })}>
+            <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#2563eb22', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', fontSize: 10, fontWeight: 600, flexShrink: 0, overflow: 'hidden' }}>
+              {userProfile.avatar_url
+                ? <img src={userProfile.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : (userProfile.full_name || userProfile.email || '?')[0].toUpperCase()}
+            </div>
+            {!isCollapsed && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userProfile.full_name || userProfile.email}</span>}
+          </NavLink>
+        )}
         <button onClick={toggle} style={btnBase()}>
           {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           {!isCollapsed && <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>}

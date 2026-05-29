@@ -5,6 +5,7 @@ import { useFeedback } from '@/lib/feedback'
 import { PageHeader, Modal, Field, Select } from '@/components/ui'
 import { logAction } from '@/lib/audit'
 import { adminAvailable, inviteUser, banUser, unbanUser } from '@/lib/supabaseAdmin'
+import { exportCSV } from '@/lib/exportCsv'
 
 interface Profile {
   id: string; email: string; full_name: string; role: string
@@ -145,13 +146,20 @@ export default function Users() {
     <div className="page" style={{ minHeight: '100%', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
       <PageHeader title="Users" sub="Manage platform users" action="Invite User" onAction={() => setInviteOpen(true)} />
 
-      {/* Search */}
-      <div style={{ position: 'relative', maxWidth: 300, marginBottom: 24 }}>
-        <svg style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: t.textMuted }} width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
-          style={{ width: '100%', padding: '8px 12px 8px 32px', background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.inputText, fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
-          onFocus={e => (e.target.style.borderColor = '#3b82f6')}
-          onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
+      {/* Search + Export */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ position: 'relative', maxWidth: 300, flex: 1 }}>
+          <svg style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: t.textMuted }} width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+            style={{ width: '100%', padding: '8px 12px 8px 32px', background: t.input, border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.inputText, fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+            onFocus={e => (e.target.style.borderColor = '#3b82f6')}
+            onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
+        </div>
+        <button
+          onClick={() => exportCSV(filtered.map(u => ({ name: u.full_name, email: u.email, role: u.role, status: u.status ?? 'active', joined: new Date(u.created_at).toLocaleDateString() })), 'users')}
+          style={{ padding: '8px 14px', borderRadius: 7, border: `1px solid ${t.borderStrong}`, background: 'transparent', color: t.textMuted, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          Export CSV
+        </button>
       </div>
 
       <div className="split">

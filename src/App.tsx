@@ -9,6 +9,8 @@ import Roles from '@/pages/Roles'
 import Programs from '@/pages/Programs'
 import Support from '@/pages/Support'
 import AuditLog from '@/pages/AuditLog'
+import Channels from '@/pages/Channels'
+import Profile from '@/pages/Profile'
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="settings/roles" element={<Roles />} />
           <Route path="support" element={<Support />} />
           <Route path="audit" element={<AuditLog />} />
+          <Route path="channels" element={<Channels />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/lib/theme'
 import { useFeedback } from '@/lib/feedback'
 import { PageHeader } from '@/components/ui'
+import { exportCSV } from '@/lib/exportCsv'
 
 interface AuditEntry {
   id: string
@@ -54,16 +55,23 @@ export default function AuditLog() {
     <div className="page" style={{ minHeight: '100%', background: t.bg, fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif' }}>
       <PageHeader title="Audit Log" sub="Complete history of admin actions" />
 
-      <div style={{ display: 'flex', gap: 6, marginBottom: 24, flexWrap: 'wrap' }}>
-        {entityTypes.map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={{
-            padding: '5px 12px', borderRadius: 6,
-            border: `1px solid ${filter === f ? '#2563eb' : t.borderStrong}`,
-            background: filter === f ? '#2563eb' : 'transparent',
-            color: filter === f ? 'white' : t.textMuted,
-            fontSize: 12, cursor: 'pointer', transition: 'all 0.1s', textTransform: 'capitalize',
-          }}>{f}</button>
-        ))}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 24, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {entityTypes.map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: '5px 12px', borderRadius: 6,
+              border: `1px solid ${filter === f ? '#2563eb' : t.borderStrong}`,
+              background: filter === f ? '#2563eb' : 'transparent',
+              color: filter === f ? 'white' : t.textMuted,
+              fontSize: 12, cursor: 'pointer', transition: 'all 0.1s', textTransform: 'capitalize',
+            }}>{f}</button>
+          ))}
+        </div>
+        <button
+          onClick={() => exportCSV(logs.map(l => ({ when: new Date(l.created_at).toLocaleString(), actor: l.actor_email ?? '', action: l.action, entity_type: l.entity_type, entity: l.entity_name ?? l.entity_id ?? '', details: JSON.stringify(l.metadata ?? {}) })), 'audit_log')}
+          style={{ padding: '5px 14px', borderRadius: 6, border: `1px solid ${t.borderStrong}`, background: 'transparent', color: t.textMuted, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          Export CSV
+        </button>
       </div>
 
       {loading ? (
