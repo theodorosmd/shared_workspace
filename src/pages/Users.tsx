@@ -13,13 +13,37 @@ interface Profile {
 }
 interface AuditEntry { id: string; action: string; entity_name: string | null; actor_email: string | null; created_at: string }
 
-const ROLE_LEVELS: Record<string, number> = { superadmin: 4, admin: 3, manager: 2, employee: 1, viewer: 0 }
+const ROLE_LEVELS: Record<string, number> = {
+  superadmin: 4, admin: 3, manager: 2,
+  employee: 1, viewer: 0,
+  // Production roles (employee level)
+  administrator: 2, responsible_publisher: 2, production_manager: 2,
+  producer: 1, production_technician: 1, production_employee: 1,
+  presenter: 1, news_writer: 1, web_designer: 1,
+}
+const ROLE_LABELS: Record<string, string> = {
+  superadmin: 'Superadmin', admin: 'Admin', manager: 'Manager',
+  employee: 'Employee', viewer: 'Viewer',
+  administrator: 'Administratör', responsible_publisher: 'Ansvarig utgivare',
+  production_manager: 'Produktionsansvarig', producer: 'Producent',
+  production_technician: 'Produktionstekniker', production_employee: 'Produktionsanställd',
+  presenter: 'Programledare', news_writer: 'Nyhetsskribent', web_designer: 'Webbdesigner',
+}
 const ROLE_COLOR: Record<string, { bg: string; text: string }> = {
-  superadmin: { bg: 'rgba(168,85,247,0.12)', text: '#c084fc' },
-  admin:      { bg: 'rgba(59,130,246,0.12)',  text: '#60a5fa' },
-  manager:    { bg: 'rgba(139,92,246,0.12)',  text: '#a78bfa' },
-  employee:   { bg: 'rgba(34,197,94,0.12)',   text: '#4ade80' },
-  viewer:     { bg: 'rgba(100,116,139,0.12)', text: '#94a3b8' },
+  superadmin:           { bg: 'rgba(168,85,247,0.12)',  text: '#c084fc' },
+  admin:                { bg: 'rgba(59,130,246,0.12)',   text: '#60a5fa' },
+  manager:              { bg: 'rgba(139,92,246,0.12)',   text: '#a78bfa' },
+  employee:             { bg: 'rgba(34,197,94,0.12)',    text: '#4ade80' },
+  viewer:               { bg: 'rgba(100,116,139,0.12)',  text: '#94a3b8' },
+  administrator:        { bg: 'rgba(59,130,246,0.12)',   text: '#60a5fa' },
+  responsible_publisher:{ bg: 'rgba(245,158,11,0.12)',   text: '#fbbf24' },
+  production_manager:   { bg: 'rgba(99,102,241,0.12)',   text: '#818cf8' },
+  producer:             { bg: 'rgba(45,212,191,0.12)',   text: '#2dd4bf' },
+  production_technician:{ bg: 'rgba(34,211,238,0.12)',   text: '#22d3ee' },
+  production_employee:  { bg: 'rgba(34,197,94,0.12)',    text: '#4ade80' },
+  presenter:            { bg: 'rgba(244,114,182,0.12)',  text: '#f472b6' },
+  news_writer:          { bg: 'rgba(251,146,60,0.12)',   text: '#fb923c' },
+  web_designer:         { bg: 'rgba(163,230,53,0.12)',   text: '#a3e635' },
 }
 
 function fmtTime(ts: string) {
@@ -81,9 +105,13 @@ export default function Users() {
     else setSelectedActivity([])
   }, [selected?.id])
 
+  const allRoles = ['superadmin', 'admin', 'manager', 'employee', 'viewer',
+    'administrator', 'responsible_publisher', 'production_manager',
+    'producer', 'production_technician', 'production_employee',
+    'presenter', 'news_writer', 'web_designer']
   const availableRoles = myRole === 'superadmin'
-    ? ['superadmin', 'admin', 'manager', 'employee', 'viewer']
-    : ['admin', 'manager', 'employee', 'viewer']
+    ? allRoles
+    : allRoles.filter(r => !['superadmin'].includes(r))
 
   const canEdit = (targetRole: string) =>
     (ROLE_LEVELS[myRole] ?? 0) > (ROLE_LEVELS[targetRole] ?? 0)
@@ -203,10 +231,10 @@ export default function Users() {
                               onChange={e => { e.stopPropagation(); changeRole(u.id, e.target.value, u.email) }}
                               onClick={e => e.stopPropagation()}
                               style={{ padding: '3px 8px', background: rc.bg, border: `1px solid ${rc.text}44`, borderRadius: 999, color: rc.text, fontSize: 11, fontWeight: 500, cursor: 'pointer', outline: 'none', appearance: 'none', paddingRight: 20, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(rc.text)}' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 5px center' }}>
-                              {availableRoles.map(r => <option key={r} value={r}>{r}</option>)}
+                              {availableRoles.map(r => <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>)}
                             </select>
                           ) : (
-                            <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{u.role || 'viewer'}</span>
+                            <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{ROLE_LABELS[u.role] ?? u.role}</span>
                           )}
                         </td>
                         <td style={{ padding: '12px 18px' }}>
@@ -237,7 +265,7 @@ export default function Users() {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {(() => {
                   const rc = ROLE_COLOR[selected.role] ?? ROLE_COLOR.viewer
-                  return <span style={{ padding: '2px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{selected.role}</span>
+                  return <span style={{ padding: '2px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{ROLE_LABELS[selected.role] ?? selected.role}</span>
                 })()}
                 <span style={{ padding: '2px 10px', borderRadius: 999, fontSize: 11, fontWeight: 500, background: selected.status === 'suspended' ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)', color: selected.status === 'suspended' ? '#f87171' : '#4ade80' }}>
                   {selected.status ?? 'active'}
@@ -295,7 +323,7 @@ export default function Users() {
           )}
           <Field label="Email address" value={inviteForm.email} onChange={v => setInviteForm({ ...inviteForm, email: v })} type="email" placeholder="name@company.com" />
           <Select label="Role" value={inviteForm.role} onChange={v => setInviteForm({ ...inviteForm, role: v })}
-            options={availableRoles.map(r => ({ value: r, label: r.charAt(0).toUpperCase() + r.slice(1) }))} />
+            options={availableRoles.map(r => ({ value: r, label: ROLE_LABELS[r] ?? r }))} />
         </Modal>
       )}
     </div>

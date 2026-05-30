@@ -3,7 +3,12 @@ import { Navigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
-const ROLE_LEVELS: Record<string, number> = { superadmin: 4, admin: 3, manager: 2, employee: 1, viewer: 0 }
+const ROLE_LEVELS: Record<string, number> = {
+  superadmin: 4, admin: 3, manager: 2, employee: 1, viewer: 0,
+  administrator: 2, responsible_publisher: 2, production_manager: 2,
+  producer: 1, production_technician: 1, production_employee: 1,
+  presenter: 1, news_writer: 1, web_designer: 1,
+}
 
 export default function ProtectedRoute({ children, minRole }: { children: React.ReactNode; minRole?: string }) {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
