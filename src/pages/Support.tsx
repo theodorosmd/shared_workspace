@@ -66,7 +66,7 @@ export default function Support() {
   }, [])
 
   useEffect(() => {
-    supabase.from('profiles').select('id, email, full_name')
+    supabase.from('users').select('id, email, full_name')
       .in('role', ['admin', 'superadmin']).eq('status', 'active')
       .then(({ data }) => setAdmins(data ?? []))
   }, [])

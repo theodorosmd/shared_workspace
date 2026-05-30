@@ -51,10 +51,10 @@ export default function Dashboard() {
 
     Promise.all([
       supabase.from('countries').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('users').select('id', { count: 'exact', head: true }),
       supabase.from('programs').select('id', { count: 'exact', head: true }),
       supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-      supabase.from('profiles').select('created_at').gte('created_at', sixMonthsAgo.toISOString()),
+      supabase.from('users').select('created_at').gte('created_at', sixMonthsAgo.toISOString()),
       supabase.from('programs').select('created_at').gte('created_at', sixMonthsAgo.toISOString()),
       supabase.from('support_tickets').select('status'),
       supabase.from('audit_logs').select('id, action, entity_type, entity_name, actor_email, created_at').order('created_at', { ascending: false }).limit(10),

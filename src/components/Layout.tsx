@@ -35,7 +35,7 @@ export default function Layout() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return
-      supabase.from('profiles').select('email, full_name, avatar_url').eq('id', data.user.id).single()
+      supabase.from('users').select('email, full_name, avatar_url').eq('id', data.user.id).single()
         .then(({ data: p }) => { if (p) setUserProfile(p) })
     })
   }, [])

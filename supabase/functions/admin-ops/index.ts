@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   // Enforce admin/superadmin role at the DB level
   const adminClient = createClient(supabaseUrl, serviceKey)
   const { data: profile } = await adminClient
-    .from('profiles').select('role').eq('id', user.id).single()
+    .from('users').select('role').eq('id', user.id).single()
   if (!profile || !['admin', 'superadmin'].includes(profile.role)) {
     return new Response('Forbidden', { status: 403, headers: corsHeaders })
   }

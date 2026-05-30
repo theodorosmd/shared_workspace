@@ -13,14 +13,14 @@ export default function ProtectedRoute({ children, minRole }: { children: React.
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s)
       if (s?.user) {
-        supabase.from('profiles').select('role').eq('id', s.user.id).single()
+        supabase.from('users').select('role').eq('id', s.user.id).single()
           .then(({ data }) => setRole(data?.role ?? 'viewer'))
       }
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s)
       if (s?.user) {
-        supabase.from('profiles').select('role').eq('id', s.user.id).single()
+        supabase.from('users').select('role').eq('id', s.user.id).single()
           .then(({ data }) => setRole(data?.role ?? 'viewer'))
       } else {
         setRole(null)

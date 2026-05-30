@@ -45,7 +45,7 @@ export default function Profile() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return navigate('/login')
-      supabase.from('profiles').select('*').eq('id', data.user.id).single()
+      supabase.from('users').select('*').eq('id', data.user.id).single()
         .then(({ data: p }) => {
           if (p) { setProfile(p); setName(p.full_name ?? '') }
         })
@@ -66,7 +66,7 @@ export default function Profile() {
   const saveProfile = async () => {
     if (!profile) return
     setSavingProfile(true)
-    const { error } = await supabase.from('profiles').update({ full_name: name }).eq('id', profile.id)
+    const { error } = await supabase.from('users').update({ full_name: name }).eq('id', profile.id)
     setSavingProfile(false)
     if (error) { toast(error.message, 'error'); return }
     toast('Profile updated')
@@ -81,7 +81,7 @@ export default function Profile() {
     const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
     if (upErr) { setUploadingAvatar(false); toast(upErr.message, 'error'); return }
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', profile.id)
+    await supabase.from('users').update({ avatar_url: publicUrl }).eq('id', profile.id)
     setProfile(p => p ? { ...p, avatar_url: publicUrl } : p)
     setUploadingAvatar(false)
     toast('Avatar updated')

@@ -50,14 +50,14 @@ export default function Users() {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) return
       setMyId(data.user.id)
-      supabase.from('profiles').select('role').eq('id', data.user.id).single()
+      supabase.from('users').select('role').eq('id', data.user.id).single()
         .then(({ data: p }) => { if (p) setMyRole(p.role) })
     })
     loadUsers()
   }, [])
 
   const loadUsers = async () => {
-    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500)
+    const { data, error } = await supabase.from('users').select('*').order('created_at', { ascending: false }).limit(500)
     if (error) toast(error.message, 'error')
     setUsers(data ?? []); setFiltered(data ?? []); setLoading(false)
   }
@@ -92,7 +92,7 @@ export default function Users() {
     const prev = users
     setUsers(p => p.map(u => u.id === id ? { ...u, role } : u))
     if (selected?.id === id) setSelected(s => s ? { ...s, role } : s)
-    const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
+    const { error } = await supabase.from('users').update({ role }).eq('id', id)
     if (error) { toast(error.message, 'error'); setUsers(prev); return }
     toast('Role updated')
     logAction('role_changed', 'user', id, email, { new_role: role })
@@ -115,7 +115,7 @@ export default function Users() {
       if (isSuspended) await unbanUser(user.id)
       else await banUser(user.id)
       const newStatus = isSuspended ? 'active' : 'suspended'
-      await supabase.from('profiles').update({ status: newStatus, suspended_at: isSuspended ? null : new Date().toISOString() }).eq('id', user.id)
+      await supabase.from('users').update({ status: newStatus, suspended_at: isSuspended ? null : new Date().toISOString() }).eq('id', user.id)
       setUsers(p => p.map(u => u.id === user.id ? { ...u, status: newStatus } : u))
       setSelected(s => s?.id === user.id ? { ...s, status: newStatus } : s)
       toast(isSuspended ? 'User unsuspended' : 'User suspended')
