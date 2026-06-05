@@ -1,69 +1,95 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
-  <!-- Globe base -->
+  <!-- Globe base (grey ocean) -->
   <circle cx="150" cy="150" r="148" fill="#757b86"/>
 
-  <!-- Landmass: Eurasia (one connected path approximating Europe+Asia) -->
+  <!-- Large red landmass covering most of the Eastern hemisphere view -->
   <path d="
-    M88,52 Q105,42 128,40 Q152,38 172,44 Q195,40 218,50
-    Q242,58 255,75 Q265,90 260,108 Q270,122 265,140
-    Q272,155 265,172 Q258,188 245,192 Q235,200 222,195
-    Q212,202 200,198 Q190,204 178,200 Q166,196 158,204
-    Q150,212 140,208 Q130,204 122,212 Q112,220 102,213
-    Q92,206 94,190 Q96,175 86,163 Q76,152 80,136
-    Q84,120 74,107 Q65,94 70,78 Q76,63 88,52 Z
-  " fill="#8b1c1c" opacity="0.92"/>
+    M60,50  C80,30 110,22 150,22 C190,22 225,35 252,58
+    C275,78 285,108 282,140 C278,172 265,200 245,220
+    C225,240 200,252 175,258 C155,262 138,258 122,250
+    C100,240 82,220 68,195 C52,168 44,138 46,108
+    C48,80 52,66 60,50 Z
+  " fill="#8b1c1c"/>
 
-  <!-- Africa -->
+  <!-- Atlantic Ocean cutout (left edge) -->
   <path d="
-    M118,205 Q130,198 143,205 Q152,212 157,228
-    Q162,246 160,265 Q157,280 150,288 Q142,280 136,264
-    Q128,246 120,228 Q114,214 118,205 Z
-  " fill="#8b1c1c" opacity="0.9"/>
+    M46,108 C40,130 40,158 50,185 C40,165 36,140 38,112 Z
+  " fill="#757b86"/>
 
-  <!-- Arabian peninsula -->
-  <path d="M192,182 Q204,178 212,190 Q216,204 208,216 Q200,222 194,212 Q190,200 192,182 Z"
-        fill="#8b1c1c" opacity="0.88"/>
+  <!-- Some subtle ocean highlights to break up the mass -->
+  <ellipse cx="88" cy="72" rx="14" ry="8" fill="#757b86" opacity="0.35"/>
+  <ellipse cx="230" cy="85" rx="10" ry="6" fill="#757b86" opacity="0.25"/>
 
-  <!-- ══ ASHUR EAGLE ══ -->
+  <!-- ══════════════ ASHUR EAGLE ══════════════ -->
 
-  <!-- Wing base bar (left) -->
-  <path d="M134,175 C110,172 82,168 56,166 C38,165 22,167 14,172
-           C22,177 38,179 56,179 C82,178 110,177 134,180 Z"
-        fill="#b89200"/>
+  <!-- Left wing: smooth curved wing shape -->
+  <path d="
+    M136,178
+    C116,172 92,164 66,158
+    C46,153 26,153 12,160
+    C10,163 12,167 16,168
+    C30,170 50,170 70,172
+    C94,175 118,178 136,182 Z
+  " fill="#c8a000"/>
 
-  <!-- Left wing feathers (4 upward-pointing primary feathers) -->
-  <path d="M128,176 L118,153 L108,176 Z" fill="#d4a800"/>
-  <path d="M108,176 L96,149 L84,176 Z" fill="#c8a000"/>
-  <path d="M84,176 L70,147 L56,176 Z" fill="#c8a000"/>
-  <path d="M56,176 L42,150 L28,176 Z" fill="#c8a000"/>
+  <!-- Left wing upper feather edge (3 gentle bumps) -->
+  <path d="
+    M136,178 C128,172 122,162 114,158 C108,163 105,172 110,178
+    C118,174 128,174 136,178 Z
+  " fill="#d4aa00"/>
+  <path d="
+    M110,177 C100,171 92,160 82,156 C74,161 72,172 78,177
+    C88,174 100,174 110,177 Z
+  " fill="#c8a000"/>
+  <path d="
+    M78,176 C66,170 56,160 44,156 C36,161 34,173 40,177
+    C52,174 66,174 78,176 Z
+  " fill="#c8a000"/>
 
-  <!-- Wing base bar (right, mirror) -->
-  <path d="M166,175 C190,172 218,168 244,166 C262,165 278,167 286,172
-           C278,177 262,179 244,179 C218,178 190,177 166,180 Z"
-        fill="#b89200"/>
+  <!-- Right wing: mirror -->
+  <path d="
+    M164,178
+    C184,172 208,164 234,158
+    C254,153 274,153 288,160
+    C290,163 288,167 284,168
+    C270,170 250,170 230,172
+    C206,175 182,178 164,182 Z
+  " fill="#c8a000"/>
 
-  <!-- Right wing feathers (mirror) -->
-  <path d="M172,176 L182,153 L192,176 Z" fill="#d4a800"/>
-  <path d="M192,176 L204,149 L216,176 Z" fill="#c8a000"/>
-  <path d="M216,176 L230,147 L244,176 Z" fill="#c8a000"/>
-  <path d="M244,176 L258,150 L272,176 Z" fill="#c8a000"/>
+  <!-- Right wing upper feather edge -->
+  <path d="
+    M164,178 C172,172 178,162 186,158 C192,163 195,172 190,178
+    C182,174 172,174 164,178 Z
+  " fill="#d4aa00"/>
+  <path d="
+    M190,177 C200,171 208,160 218,156 C226,161 228,172 222,177
+    C212,174 200,174 190,177 Z
+  " fill="#c8a000"/>
+  <path d="
+    M222,176 C234,170 244,160 256,156 C264,161 266,173 260,177
+    C248,174 234,174 222,176 Z
+  " fill="#c8a000"/>
 
-  <!-- Central disc ring -->
-  <circle cx="150" cy="174" r="17" fill="#c8a000"/>
-  <circle cx="150" cy="174" r="12" fill="#8b6800"/>
-  <circle cx="150" cy="174" r="7" fill="#c8a000"/>
+  <!-- Central disc -->
+  <circle cx="150" cy="176" r="18" fill="#c8a000"/>
+  <circle cx="150" cy="176" r="12" fill="#7a5a00"/>
+  <circle cx="150" cy="176" r="6"  fill="#c8a000"/>
 
-  <!-- Flame on top -->
-  <path d="M144,158 Q148,142 150,136 Q152,142 156,158 Q153,162 150,163 Q147,162 144,158 Z" fill="#e8c000"/>
-  <path d="M147,153 Q150,142 153,153 Q151,157 150,158 Q149,157 147,153 Z" fill="#ff9900"/>
+  <!-- Flame / head above body -->
+  <path d="M143,160 C145,148 150,138 150,132 C150,138 155,148 157,160
+           C155,164 152,166 150,166 C148,166 145,164 143,160 Z"
+        fill="#e8c000"/>
+  <path d="M147,156 C148,147 150,140 150,136 C150,140 152,147 153,156
+           C152,159 150,160 150,160 C150,160 148,159 147,156 Z"
+        fill="#ff9900"/>
 
-  <!-- Stars below -->
-  <circle cx="133" cy="196" r="2.2" fill="#d4a800"/>
-  <circle cx="141" cy="198" r="2.2" fill="#d4a800"/>
-  <circle cx="150" cy="199" r="2.2" fill="#d4a800"/>
-  <circle cx="159" cy="198" r="2.2" fill="#d4a800"/>
-  <circle cx="167" cy="196" r="2.2" fill="#d4a800"/>
+  <!-- Small decorative stars below -->
+  <circle cx="134" cy="198" r="2.5" fill="#d4aa00"/>
+  <circle cx="142" cy="200" r="2.5" fill="#d4aa00"/>
+  <circle cx="150" cy="201" r="2.5" fill="#d4aa00"/>
+  <circle cx="158" cy="200" r="2.5" fill="#d4aa00"/>
+  <circle cx="166" cy="198" r="2.5" fill="#d4aa00"/>
 
-  <!-- Globe border -->
-  <circle cx="150" cy="150" r="148" fill="none" stroke="#5a6070" stroke-width="2.5"/>
+  <!-- Globe border ring -->
+  <circle cx="150" cy="150" r="148" fill="none" stroke="#555b66" stroke-width="3"/>
 </svg>
