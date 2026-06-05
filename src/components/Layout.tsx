@@ -72,7 +72,7 @@ export default function Layout() {
     }}>
       {/* Logo */}
       <div style={{ height: 52, display: 'flex', alignItems: 'center', padding: isCollapsed ? '0' : '0 16px', justifyContent: isCollapsed ? 'center' : 'flex-start', borderBottom: `1px solid ${t.border}`, gap: 10 }}>
-        <img src="/logo.png" alt="Suryoyo Sat" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0, borderRadius: 4 }} />
+        <img src="/logo.svg" alt="Suryoyo Sat" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0, borderRadius: 4 }} />
         {!isCollapsed && <span style={{ color: t.text, fontSize: 13, fontWeight: 600, letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>Suryoyo Sat</span>}
       </div>
 

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Grey globe background -->
+  <circle cx="100" cy="100" r="98" fill="#8a8f98"/>
+  <!-- Red continent shapes (Europe/Asia/Africa silhouette) -->
+  <ellipse cx="85" cy="55" rx="38" ry="22" fill="#8b1c1c" opacity="0.9"/>
+  <ellipse cx="120" cy="65" rx="42" ry="28" fill="#8b1c1c" opacity="0.9"/>
+  <ellipse cx="105" cy="90" rx="30" ry="22" fill="#8b1c1c" opacity="0.85"/>
+  <ellipse cx="72" cy="80" rx="20" ry="28" fill="#8b1c1c" opacity="0.85"/>
+  <ellipse cx="88" cy="110" rx="18" ry="24" fill="#8b1c1c" opacity="0.8"/>
+  <ellipse cx="130" cy="95" rx="28" ry="20" fill="#8b1c1c" opacity="0.85"/>
+  <!-- Golden eagle body / central disc -->
+  <circle cx="100" cy="108" r="13" fill="#c8a000" stroke="#e8c000" stroke-width="1.5"/>
+  <!-- Flame on top -->
+  <ellipse cx="100" cy="88" rx="7" ry="10" fill="#e8c000"/>
+  <ellipse cx="100" cy="82" rx="4" ry="6" fill="#ff9900"/>
+  <!-- Left wing -->
+  <path d="M87,105 Q70,88 48,82 Q38,80 30,85 Q40,92 52,97 Q65,102 78,108 Z" fill="#c8a000"/>
+  <path d="M84,110 Q68,100 44,96 Q34,95 28,100 Q38,104 52,108 Q68,112 82,114 Z" fill="#c8a000"/>
+  <path d="M86,115 Q70,112 50,112 Q38,113 32,118 Q44,118 56,117 Q72,116 85,118 Z" fill="#c8a000"/>
+  <!-- Right wing -->
+  <path d="M113,105 Q130,88 152,82 Q162,80 170,85 Q160,92 148,97 Q135,102 122,108 Z" fill="#c8a000"/>
+  <path d="M116,110 Q132,100 156,96 Q166,95 172,100 Q162,104 148,108 Q132,112 118,114 Z" fill="#c8a000"/>
+  <path d="M114,115 Q130,112 150,112 Q162,113 168,118 Q156,118 144,117 Q128,116 115,118 Z" fill="#c8a000"/>
+  <!-- Wing feather highlights -->
+  <path d="M87,105 Q70,88 48,82" fill="none" stroke="#e8c000" stroke-width="1" opacity="0.6"/>
+  <path d="M113,105 Q130,88 152,82" fill="none" stroke="#e8c000" stroke-width="1" opacity="0.6"/>
+  <!-- Stars/decorations below body -->
+  <circle cx="88" cy="124" r="2" fill="#e8c000"/>
+  <circle cx="94" cy="126" r="2" fill="#e8c000"/>
+  <circle cx="100" cy="127" r="2" fill="#e8c000"/>
+  <circle cx="106" cy="126" r="2" fill="#e8c000"/>
+  <circle cx="112" cy="124" r="2" fill="#e8c000"/>
+  <!-- Globe outline -->
+  <circle cx="100" cy="100" r="98" fill="none" stroke="#6a6f78" stroke-width="2"/>
+</svg>
