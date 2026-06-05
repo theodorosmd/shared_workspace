@@ -72,11 +72,7 @@ export default function Layout() {
     }}>
       {/* Logo */}
       <div style={{ height: 52, display: 'flex', alignItems: 'center', padding: isCollapsed ? '0' : '0 16px', justifyContent: isCollapsed ? 'center' : 'flex-start', borderBottom: `1px solid ${t.border}`, gap: 10 }}>
-        <div style={{ width: 24, height: 24, borderRadius: 6, background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="12" height="12" fill="none" stroke="white" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
+        <img src="/logo.png" alt="Suryoyo Sat" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0, borderRadius: 4 }} />
         {!isCollapsed && <span style={{ color: t.text, fontSize: 13, fontWeight: 600, letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>Suryoyo Sat</span>}
       </div>
 
