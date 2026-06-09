@@ -65,23 +65,24 @@ export function Modal({ title, children, onClose, onSave, saveLabel = 'Save', sa
   )
 }
 
-export function Field({ label, value, onChange, placeholder, type = 'text', multiline, maxLength }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; multiline?: boolean; maxLength?: number }) {
+export function Field({ label, value, onChange, placeholder, type = 'text', multiline, maxLength, disabled }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; multiline?: boolean; maxLength?: number; disabled?: boolean }) {
   const { t } = useTheme()
   const base: React.CSSProperties = {
     width: '100%', padding: '9px 12px', background: t.input,
     border: `1px solid ${t.inputBorder}`, borderRadius: 7, color: t.inputText,
     fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s',
     fontFamily: 'inherit',
+    ...(disabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}),
   }
   return (
     <div>
       <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: t.textMuted, marginBottom: 6, letterSpacing: '0.02em' }}>{label}</label>
       {multiline
-        ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3} maxLength={maxLength ?? 2000} style={{ ...base, resize: 'none' }}
+        ? <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3} maxLength={maxLength ?? 2000} disabled={disabled} style={{ ...base, resize: 'none' }}
             onFocus={e => (e.target.style.borderColor = '#3b82f6')}
             onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
-        : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength ?? (type === 'email' ? 254 : 500)} style={base}
-            onFocus={e => (e.target.style.borderColor = '#3b82f6')}
+        : <input type={type} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} maxLength={maxLength ?? (type === 'email' ? 254 : 500)} disabled={disabled} style={base}
+            onFocus={e => { if (!disabled) e.target.style.borderColor = '#3b82f6' }}
             onBlur={e => (e.target.style.borderColor = t.inputBorder)} />
       }
     </div>
