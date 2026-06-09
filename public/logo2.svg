@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#3a0000"/>
+      <stop offset="60%" stop-color="#1a0000"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <radialGradient id="globe" cx="55%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#8b0a0a"/>
+      <stop offset="70%" stop-color="#6b0000"/>
+      <stop offset="100%" stop-color="#3a0000"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Dark background circle -->
+  <circle cx="150" cy="150" r="148" fill="url(#bg)"/>
+
+  <!-- Globe / continent shape (Eastern hemisphere) -->
+  <path d="
+    M70,55  C92,34 120,24 150,24 C182,24 210,36 234,58
+    C256,78 268,108 266,140 C263,172 250,200 230,220
+    C210,240 184,254 158,258 C136,262 116,255 98,244
+    C76,230 58,208 46,182 C34,156 30,126 36,98
+    C42,72 54,70 70,55 Z
+  " fill="url(#globe)" opacity="0.85"/>
+
+  <!-- Subtle globe grid lines -->
+  <ellipse cx="150" cy="141" rx="126" ry="117" fill="none" stroke="#6b0000" stroke-width="0.6" opacity="0.5"/>
+  <line x1="24" y1="141" x2="276" y2="141" stroke="#6b0000" stroke-width="0.6" opacity="0.4"/>
+  <line x1="150" y1="24" x2="150" y2="276" stroke="#6b0000" stroke-width="0.6" opacity="0.4"/>
+  <path d="M60,80 Q150,60 240,80" fill="none" stroke="#6b0000" stroke-width="0.6" opacity="0.4"/>
+  <path d="M36,110 Q150,90 264,110" fill="none" stroke="#6b0000" stroke-width="0.6" opacity="0.4"/>
+  <path d="M30,170 Q150,185 270,170" fill="none" stroke="#6b0000" stroke-width="0.6" opacity="0.4"/>
+  <path d="M44,200 Q150,220 256,200" fill="none" stroke="#6b0000" stroke-width="0.6" opacity="0.4"/>
+
+  <!-- ══════════ ASHUR EAGLE ══════════ -->
+
+  <!-- Left wing — sweeps down then curves up at tip -->
+  <path d="
+    M148,180
+    C138,176 120,170 100,164
+    C80,158 58,154 38,156
+    C28,157 20,162 22,168
+    C24,172 34,174 52,174
+    C72,174 98,177 118,180
+    C130,182 140,182 148,182 Z
+  " fill="#c8a000"/>
+  <!-- Left wing feather tips (3 lobes) -->
+  <path d="M148,180 C140,172 132,160 122,154 C114,159 112,170 118,177 C128,174 138,175 148,180 Z" fill="#d4aa00"/>
+  <path d="M118,176 C108,168 98,157 86,152 C78,157 76,170 82,176 C92,173 106,174 118,176 Z" fill="#c8a000"/>
+  <path d="M82,175 C70,167 58,157 44,153 C36,158 34,170 40,175 C52,172 68,173 82,175 Z" fill="#b89400"/>
+
+  <!-- Right wing — mirror -->
+  <path d="
+    M152,180
+    C162,176 180,170 200,164
+    C220,158 242,154 262,156
+    C272,157 280,162 278,168
+    C276,172 266,174 248,174
+    C228,174 202,177 182,180
+    C170,182 160,182 152,182 Z
+  " fill="#c8a000"/>
+  <!-- Right wing feather tips -->
+  <path d="M152,180 C160,172 168,160 178,154 C186,159 188,170 182,177 C172,174 162,175 152,180 Z" fill="#d4aa00"/>
+  <path d="M182,176 C192,168 202,157 214,152 C222,157 224,170 218,176 C208,173 194,174 182,176 Z" fill="#c8a000"/>
+  <path d="M218,175 C230,167 242,157 256,153 C264,158 266,170 260,175 C248,172 232,173 218,175 Z" fill="#b89400"/>
+
+  <!-- Tail feathers -->
+  <path d="M138,195 C140,200 144,206 150,210 C156,206 160,200 162,195 Z" fill="#c8a000"/>
+  <path d="M130,193 C131,200 135,208 142,212 C140,205 138,197 138,195 Z" fill="#b89400"/>
+  <path d="M170,193 C169,200 165,208 158,212 C160,205 162,197 162,195 Z" fill="#b89400"/>
+
+  <!-- Body / central disc ring -->
+  <circle cx="150" cy="180" r="20" fill="#c8a000"/>
+  <circle cx="150" cy="180" r="14" fill="#0d0000"/>
+  <circle cx="150" cy="180" r="8"  fill="#c8a000"/>
+  <circle cx="150" cy="180" r="4"  fill="#7a4a00"/>
+
+  <!-- Neck -->
+  <rect x="145" y="160" width="10" height="22" rx="5" fill="#c8a000"/>
+
+  <!-- Head -->
+  <ellipse cx="150" cy="156" rx="10" ry="9" fill="#c8a000"/>
+
+  <!-- Beak -->
+  <path d="M150,152 L157,158 L150,159 Z" fill="#b89400"/>
+
+  <!-- Eye -->
+  <circle cx="153" cy="154" r="2" fill="#0d0000"/>
+  <circle cx="153" cy="154" r="1" fill="#c8a000"/>
+
+  <!-- Flame / Torch above head -->
+  <path d="M144,148 C146,136 150,124 150,116 C150,124 154,136 156,148
+           C154,153 152,156 150,156 C148,156 146,153 144,148 Z"
+        fill="#e8c000"/>
+  <path d="M147,146 C148,137 150,128 150,120 C150,128 152,137 153,146
+           C152,150 150,152 150,152 C150,152 148,150 147,146 Z"
+        fill="#ff9900"/>
+  <path d="M149,143 C149.5,136 150,130 150,126 C150,130 150.5,136 151,143
+           C150.5,146 150,148 150,148 C150,148 149.5,146 149,143 Z"
+        fill="#ffffff" opacity="0.7"/>
+
+  <!-- Small stars below disc -->
+  <circle cx="132" cy="202" r="2.5" fill="#d4aa00"/>
+  <circle cx="141" cy="205" r="2.5" fill="#d4aa00"/>
+  <circle cx="150" cy="206" r="2.5" fill="#d4aa00"/>
+  <circle cx="159" cy="205" r="2.5" fill="#d4aa00"/>
+  <circle cx="168" cy="202" r="2.5" fill="#d4aa00"/>
+
+  <!-- Outer border ring -->
+  <circle cx="150" cy="150" r="148" fill="none" stroke="#3a1a00" stroke-width="4"/>
+  <circle cx="150" cy="150" r="145" fill="none" stroke="#c8a000" stroke-width="1" opacity="0.4"/>
+</svg>
