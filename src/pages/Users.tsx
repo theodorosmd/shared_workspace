@@ -9,6 +9,7 @@ import { exportCSV } from '@/lib/exportCsv'
 
 interface Profile {
   id: string; email: string; full_name: string; role: string
+  roles?: string[] | null
   status: string; suspended_at: string | null; created_at: string
   last_login?: string | null; phone?: string | null
   country?: string | null; city?: string | null
@@ -138,9 +139,14 @@ export default function Users() {
   const [inviting, setInviting] = useState(false)
   const [countries, setCountries] = useState<CountryOpt[]>([])
   const [roleModalUser, setRoleModalUser] = useState<Profile | null>(null)
-  const [selectedNewRole, setSelectedNewRole] = useState('')
+  const [selectedNewRoles, setSelectedNewRoles] = useState<string[]>([])
 
-  const openRoleModal = (user: Profile) => { setSelectedNewRole(user.role); setRoleModalUser(user) }
+  const openRoleModal = (user: Profile) => {
+    setSelectedNewRoles(user.roles?.length ? user.roles : [user.role])
+    setRoleModalUser(user)
+  }
+  const toggleRoleSelection = (r: string) =>
+    setSelectedNewRoles(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -188,14 +194,21 @@ export default function Users() {
   const canEdit = (targetRole: string) =>
     (ROLE_LEVELS[myRole] ?? 0) > (ROLE_LEVELS[targetRole] ?? 0)
 
-  const changeRole = async (id: string, role: string, email: string) => {
+  const changeRole = async (id: string, roles: string[], email: string) => {
+    const sorted = [...roles].sort((a, b) => (ROLE_LEVELS[b] ?? 0) - (ROLE_LEVELS[a] ?? 0))
+    const primary = sorted[0] || 'viewer'
     const prev = users
-    setUsers(p => p.map(u => u.id === id ? { ...u, role } : u))
-    if (selected?.id === id) setSelected(s => s ? { ...s, role } : s)
-    const { error } = await supabase.from('users').update({ role }).eq('id', id)
+    setUsers(p => p.map(u => u.id === id ? { ...u, role: primary, roles } : u))
+    if (selected?.id === id) setSelected(s => s ? { ...s, role: primary, roles } : s)
+    // Try to update with roles array; fall back to just role if column doesn't exist yet
+    let { error } = await supabase.from('users').update({ role: primary, roles }).eq('id', id)
+    if (error?.message?.includes('roles')) {
+      const { error: e2 } = await supabase.from('users').update({ role: primary }).eq('id', id)
+      error = e2 ?? null
+    }
     if (error) { toast(error.message, 'error'); setUsers(prev); return }
-    toast('Role updated')
-    logAction('role_changed', 'user', id, email, { new_role: role })
+    toast('Roles updated')
+    logAction('role_changed', 'user', id, email, { new_roles: roles })
   }
 
   const toggleActive = async (user: Profile) => {
@@ -306,7 +319,12 @@ export default function Users() {
                           </div>
                         </td>
                         <td style={{ padding: '12px 18px' }}>
-                          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{ROLE_LABELS[u.role] ?? u.role}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{ROLE_LABELS[u.role] ?? u.role}</span>
+                            {u.roles && u.roles.length > 1 && (
+                              <span style={{ color: t.textGhost, fontSize: 11 }}>+{u.roles.length - 1}</span>
+                            )}
+                          </div>
                         </td>
                         <td style={{ padding: '12px 18px' }}>
                           {editable
@@ -385,31 +403,37 @@ export default function Users() {
 
       {/* Role change modal */}
       {roleModalUser && (
-        <Modal title="Change Role" onClose={() => setRoleModalUser(null)}
+        <Modal title="Change Roles" onClose={() => setRoleModalUser(null)}
           onSave={() => {
-            if (selectedNewRole && selectedNewRole !== roleModalUser.role)
-              changeRole(roleModalUser.id, selectedNewRole, roleModalUser.email)
+            if (selectedNewRoles.length > 0)
+              changeRole(roleModalUser.id, selectedNewRoles, roleModalUser.email)
             setRoleModalUser(null)
           }}
           saveLabel="Save">
-          <p style={{ color: t.textMuted, fontSize: 13, margin: '0 0 14px' }}>
-            Select a role for <strong style={{ color: t.text }}>{roleModalUser.full_name || roleModalUser.email}</strong>
+          <p style={{ color: t.textMuted, fontSize: 13, margin: '0 0 4px' }}>
+            Roles for <strong style={{ color: t.text }}>{roleModalUser.full_name || roleModalUser.email}</strong>
           </p>
+          <p style={{ color: t.textGhost, fontSize: 11, margin: '0 0 14px' }}>Select one or more roles. The highest-level role is used as the primary.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 360, overflowY: 'auto' }}>
             {availableRoles.map(r => {
               const rc = ROLE_COLOR[r] ?? ROLE_COLOR.viewer
-              const isSel = r === selectedNewRole
+              const isSel = selectedNewRoles.includes(r)
               return (
-                <button key={r} onClick={() => setSelectedNewRole(r)}
+                <button key={r} onClick={() => toggleRoleSelection(r)}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
                     borderRadius: 8, border: `1px solid ${isSel ? rc.text + '44' : t.border}`,
                     background: isSel ? rc.bg : 'transparent', cursor: 'pointer', textAlign: 'left',
                     transition: 'all 0.1s', width: '100%' }}>
+                  <div style={{ width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                    border: `1.5px solid ${isSel ? rc.text : t.borderStrong}`,
+                    background: isSel ? rc.text : 'transparent',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {isSel && <span style={{ color: 'white', fontSize: 10, lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                  </div>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: rc.text, flexShrink: 0 }} />
                   <span style={{ color: isSel ? rc.text : t.textSub, fontSize: 13, fontWeight: isSel ? 500 : 400 }}>
                     {ROLE_LABELS[r] ?? r}
                   </span>
-                  {isSel && <span style={{ marginLeft: 'auto', color: rc.text, fontSize: 13 }}>✓</span>}
                 </button>
               )
             })}
