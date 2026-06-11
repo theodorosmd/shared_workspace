@@ -16,7 +16,7 @@ const nav = [
   { to: '/users',         label: 'Users',      icon: <Users size={15} /> },
   { to: '/programs',      label: 'Programs',   icon: <Upload size={15} /> },
   { to: '/channels',      label: 'Channels',   icon: <Tv2 size={15} /> },
-  { to: '/settings/roles',label: 'Settings',   icon: <Settings size={15} /> },
+  { to: '/settings/roles',label: 'Roles',      icon: <Settings size={15} /> },
   { to: '/support',       label: 'Support',    icon: <LifeBuoy size={15} /> },
   { to: '/audit',         label: 'Audit Log',  icon: <ClipboardList size={15} /> },
 ]

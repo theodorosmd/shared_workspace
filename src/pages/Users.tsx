@@ -69,12 +69,13 @@ function Toggle({ on, onChange }: { on: boolean; onChange: () => void }) {
   )
 }
 
-function RoleMenu({ role, roles, onSelect, rc }: {
-  role: string; roles: string[]; onSelect: (r: string) => void;
-  rc: { bg: string; text: string }
+function RowActionsMenu({ user, onChangeRole, onToggleActive }: {
+  user: Profile; onChangeRole: () => void; onToggleActive: () => void;
 }) {
+  const { t } = useTheme()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const isActive = user.status !== 'suspended'
 
   useEffect(() => {
     if (!open) return
@@ -84,32 +85,37 @@ function RoleMenu({ role, roles, onSelect, rc }: {
   }, [open])
 
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }} onClick={e => e.stopPropagation()}>
+    <div ref={ref} style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
       <button onClick={() => setOpen(o => !o)}
-        style={{ padding: '3px 10px', borderRadius: 999, background: rc.bg, border: `1px solid ${rc.text}44`,
-          color: rc.text, fontSize: 11, fontWeight: 500, cursor: 'pointer' }}>
-        {ROLE_LABELS[role] ?? role}
+        style={{ background: 'transparent', border: 'none', cursor: 'pointer',
+          color: t.textGhost, padding: '4px 8px', borderRadius: 4,
+          fontSize: 18, lineHeight: 1, letterSpacing: '2px', fontWeight: 700 }}>
+        ···
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, background: '#1e2433',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, zIndex: 100,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.4)', minWidth: 180, overflow: 'hidden' }}>
-          {roles.map(r => {
-            const c = ROLE_COLOR[r] ?? ROLE_COLOR.viewer
-            return (
-              <button key={r} onClick={() => { onSelect(r); setOpen(false) }}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 12px',
-                  background: r === role ? 'rgba(255,255,255,0.06)' : 'transparent', border: 'none',
-                  cursor: 'pointer', fontSize: 12, color: c.text, textAlign: 'left',
-                  transition: 'background 0.1s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
-                onMouseLeave={e => (e.currentTarget.style.background = r === role ? 'rgba(255,255,255,0.06)' : 'transparent')}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: c.text, flexShrink: 0 }} />
-                {ROLE_LABELS[r] ?? r}
-                {r === role && <span style={{ marginLeft: 'auto', fontSize: 10, opacity: 0.5 }}>✓</span>}
-              </button>
-            )
-          })}
+        <div style={{
+          position: 'absolute', right: 0, top: '100%', marginTop: 4,
+          background: t.surface, border: `1px solid ${t.borderStrong}`,
+          borderRadius: 8, zIndex: 200, boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          minWidth: 160, overflow: 'hidden',
+        }}>
+          <button
+            onClick={() => { setOpen(false); onChangeRole() }}
+            style={{ display: 'block', width: '100%', padding: '9px 14px', background: 'transparent',
+              border: 'none', cursor: 'pointer', fontSize: 13, color: t.textSub, textAlign: 'left' }}
+            onMouseEnter={e => (e.currentTarget.style.background = t.surfaceHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+            Change Role
+          </button>
+          <button
+            onClick={() => { setOpen(false); onToggleActive() }}
+            style={{ display: 'block', width: '100%', padding: '9px 14px', background: 'transparent',
+              border: 'none', cursor: 'pointer', fontSize: 13,
+              color: isActive ? t.dangerText : '#22c55e', textAlign: 'left' }}
+            onMouseEnter={e => (e.currentTarget.style.background = t.surfaceHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+            {isActive ? 'Deactivate' : 'Activate'}
+          </button>
         </div>
       )}
     </div>
@@ -131,6 +137,10 @@ export default function Users() {
   const [inviteForm, setInviteForm] = useState({ full_name: '', phone: '', email: '', role: 'viewer', country: '', city: '' })
   const [inviting, setInviting] = useState(false)
   const [countries, setCountries] = useState<CountryOpt[]>([])
+  const [roleModalUser, setRoleModalUser] = useState<Profile | null>(null)
+  const [selectedNewRole, setSelectedNewRole] = useState('')
+
+  const openRoleModal = (user: Profile) => { setSelectedNewRole(user.role); setRoleModalUser(user) }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -271,7 +281,7 @@ export default function Users() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 540 }}>
                 <thead>
                   <tr>
-                    {['User', 'Role', 'Active', 'Last Login', 'Joined'].map(h => (
+                    {['User', 'Role', 'Active', 'Last Login', 'Joined', ''].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '11px 18px', color: t.textMuted, fontWeight: 500, borderBottom: `1px solid ${t.border}`, fontSize: 12 }}>{h}</th>
                     ))}
                   </tr>
@@ -296,10 +306,7 @@ export default function Users() {
                           </div>
                         </td>
                         <td style={{ padding: '12px 18px' }}>
-                          {editable
-                            ? <RoleMenu role={u.role || 'viewer'} roles={availableRoles} rc={rc} onSelect={r => changeRole(u.id, r, u.email)} />
-                            : <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{ROLE_LABELS[u.role] ?? u.role}</span>
-                          }
+                          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, background: rc.bg, color: rc.text, fontSize: 11, fontWeight: 500 }}>{ROLE_LABELS[u.role] ?? u.role}</span>
                         </td>
                         <td style={{ padding: '12px 18px' }}>
                           {editable
@@ -311,6 +318,15 @@ export default function Users() {
                           {u.last_login ? fmtTime(u.last_login) : '—'}
                         </td>
                         <td style={{ padding: '12px 18px', color: t.textMuted }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td style={{ padding: '12px 4px', textAlign: 'right' }}>
+                          {editable && (
+                            <RowActionsMenu
+                              user={u}
+                              onChangeRole={() => openRoleModal(u)}
+                              onToggleActive={() => toggleActive(u)}
+                            />
+                          )}
+                        </td>
                       </tr>
                     )
                   })}
@@ -366,6 +382,40 @@ export default function Users() {
           </div>
         )}
       </div>
+
+      {/* Role change modal */}
+      {roleModalUser && (
+        <Modal title="Change Role" onClose={() => setRoleModalUser(null)}
+          onSave={() => {
+            if (selectedNewRole && selectedNewRole !== roleModalUser.role)
+              changeRole(roleModalUser.id, selectedNewRole, roleModalUser.email)
+            setRoleModalUser(null)
+          }}
+          saveLabel="Save">
+          <p style={{ color: t.textMuted, fontSize: 13, margin: '0 0 14px' }}>
+            Select a role for <strong style={{ color: t.text }}>{roleModalUser.full_name || roleModalUser.email}</strong>
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 360, overflowY: 'auto' }}>
+            {availableRoles.map(r => {
+              const rc = ROLE_COLOR[r] ?? ROLE_COLOR.viewer
+              const isSel = r === selectedNewRole
+              return (
+                <button key={r} onClick={() => setSelectedNewRole(r)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px',
+                    borderRadius: 8, border: `1px solid ${isSel ? rc.text + '44' : t.border}`,
+                    background: isSel ? rc.bg : 'transparent', cursor: 'pointer', textAlign: 'left',
+                    transition: 'all 0.1s', width: '100%' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: rc.text, flexShrink: 0 }} />
+                  <span style={{ color: isSel ? rc.text : t.textSub, fontSize: 13, fontWeight: isSel ? 500 : 400 }}>
+                    {ROLE_LABELS[r] ?? r}
+                  </span>
+                  {isSel && <span style={{ marginLeft: 'auto', color: rc.text, fontSize: 13 }}>✓</span>}
+                </button>
+              )
+            })}
+          </div>
+        </Modal>
+      )}
 
       {/* Invite modal */}
       {inviteOpen && (
