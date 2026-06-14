@@ -5,6 +5,7 @@ import { useFeedback } from '@/lib/feedback'
 import { Modal, Field, Select } from '@/components/ui'
 import { logAction } from '@/lib/audit'
 import { exportCSV } from '@/lib/exportCsv'
+import { CloudUpload } from 'lucide-react'
 
 interface Program {
   id: string; title: string; description: string; file_url: string
@@ -205,7 +206,7 @@ export default function Programs() {
                   </div>
                 ) : (
                   <div style={{ height: 64, background: catColor + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="20" height="20" fill="none" stroke={catColor} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                    <CloudUpload size={20} color={catColor} />
                   </div>
                 )}
 

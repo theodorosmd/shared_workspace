@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react'
+import { Check, X, Info } from 'lucide-react'
 import { useTheme } from '@/lib/theme'
 
 type ToastType = 'success' | 'error' | 'info'
@@ -15,9 +16,9 @@ interface FeedbackCtx {
 const Ctx = createContext<FeedbackCtx>({} as FeedbackCtx)
 
 const ICONS: Record<ToastType, React.ReactNode> = {
-  success: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 13l4 4L19 7" /></svg>,
-  error: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M6 18L18 6M6 6l12 12" /></svg>,
-  info: <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  success: <Check size={15} />,
+  error:   <X size={15} />,
+  info:    <Info size={15} />,
 }
 const ACCENT: Record<ToastType, string> = { success: '#22c55e', error: '#ef4444', info: '#3b82f6' }
 

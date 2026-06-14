@@ -242,22 +242,19 @@ export default function Users() {
     setInviting(true)
     try {
       await inviteUser(inviteForm.email.trim(), inviteForm.role)
-      // Upsert extra profile fields after invite
-      setTimeout(async () => {
-        await supabase.from('users').upsert({
-          email: inviteForm.email.trim(),
-          full_name: inviteForm.full_name.trim() || null,
-          phone: inviteForm.phone.trim() || null,
-          country: inviteForm.country || null,
-          city: inviteForm.city.trim() || null,
-          role: inviteForm.role,
-        }, { onConflict: 'email' })
-      }, 1500)
+      await supabase.from('users').upsert({
+        email: inviteForm.email.trim(),
+        full_name: inviteForm.full_name.trim() || null,
+        phone: inviteForm.phone.trim() || null,
+        country: inviteForm.country || null,
+        city: inviteForm.city.trim() || null,
+        role: inviteForm.role,
+      }, { onConflict: 'email' })
       toast(`Invite sent to ${inviteForm.email}`)
       logAction('invited', 'user', undefined, inviteForm.email, { role: inviteForm.role })
       setInviteOpen(false)
       setInviteForm({ full_name: '', phone: '', email: '', role: 'viewer', country: '', city: '' })
-      setTimeout(loadUsers, 2000)
+      await loadUsers()
     } catch (e: unknown) {
       toast(e instanceof Error ? e.message : 'Invite failed', 'error')
     }

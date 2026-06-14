@@ -4,6 +4,7 @@ import { useTheme } from '@/lib/theme'
 import { useFeedback } from '@/lib/feedback'
 import { PageHeader, Modal, Field, Select, ActionBtn } from '@/components/ui'
 import { logAction } from '@/lib/audit'
+import { Radio, Play } from 'lucide-react'
 
 interface Channel { id: string; name: string; description: string; stream_url: string | null; type: string; status: string; sort_order: number; created_at: string }
 interface EPGEntry { id: string; channel_id: string; program_id: string | null; title: string; description: string | null; start_time: string; end_time: string }
@@ -183,8 +184,8 @@ export default function Channels() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ width: 32, height: 32, borderRadius: 8, background: tc.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {c.type === 'live'
-                            ? <svg width="14" height="14" fill={tc.text} viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" opacity="0.3" /><circle cx="12" cy="12" r="3" /></svg>
-                            : <svg width="14" height="14" fill="none" stroke={tc.text} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            ? <Radio size={14} color={tc.text} />
+                            : <Play size={14} color={tc.text} />
                           }
                         </div>
                         <div>

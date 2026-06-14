@@ -119,6 +119,7 @@ export function Badge({ label, color }: { label: string; color: string }) {
     amber:  { bg: 'rgba(245,158,11,0.12)',  text: '#fbbf24' },
     red:    { bg: 'rgba(239,68,68,0.12)',   text: '#f87171' },
     slate:  { bg: 'rgba(100,116,139,0.12)', text: '#94a3b8' },
+    cyan:   { bg: 'rgba(6,182,212,0.12)',   text: '#0891b2' },
   }
   const c = colorMap[color] ?? colorMap.slate
   return (

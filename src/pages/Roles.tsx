@@ -70,22 +70,24 @@ export default function Roles() {
   , [customRoles])
 
   const loadCustomRoles = useCallback(async () => {
-    const { data } = await supabase.from('custom_roles').select('id, label, description').order('created_at')
+    const { data, error } = await supabase.from('custom_roles').select('id, label, description').order('created_at')
+    if (error) { toast(error.message, 'error'); return }
     setCustomRoles(data ?? [])
-  }, [])
+  }, [toast])
 
   useEffect(() => { loadCustomRoles() }, [loadCustomRoles])
 
   const loadPerms = useCallback(async (role: string) => {
     setLoading(true)
-    const { data } = await supabase.from('role_permissions').select('module, action').eq('role', role)
+    const { data, error } = await supabase.from('role_permissions').select('module, action').eq('role', role)
+    if (error) { toast(error.message, 'error'); setLoading(false); return }
     const m: Record<string, Set<Action>> = {}
     for (const row of (data ?? [])) {
       if (!m[row.module]) m[row.module] = new Set()
       m[row.module].add(row.action as Action)
     }
     setMap(m); setLoading(false)
-  }, [])
+  }, [toast])
 
   useEffect(() => { loadPerms(sel) }, [sel, loadPerms])
 
@@ -129,7 +131,8 @@ export default function Roles() {
         const [module, action] = key.split(':')
         return { role: id, module, action }
       })
-      await supabase.from('role_permissions').insert(rows)
+      const { error: permErr } = await supabase.from('role_permissions').insert(rows)
+      if (permErr) { toast(permErr.message, 'error'); setCreating(false); return }
     }
     toast(`Role "${newName.trim()}" created`)
     setCreating(false); setShowNew(false); setNewName(''); setNewDesc(''); setNewPerms(new Set())
@@ -140,8 +143,10 @@ export default function Roles() {
   const deleteRole = async (id: string, label: string) => {
     const ok = await confirm({ title: `Delete "${label}"?`, message: 'All permissions for this role will be removed.', danger: true, confirmLabel: 'Delete' })
     if (!ok) return
-    await supabase.from('role_permissions').delete().eq('role', id)
-    await supabase.from('custom_roles').delete().eq('id', id)
+    const { error: e1 } = await supabase.from('role_permissions').delete().eq('role', id)
+    if (e1) { toast(e1.message, 'error'); return }
+    const { error: e2 } = await supabase.from('custom_roles').delete().eq('id', id)
+    if (e2) { toast(e2.message, 'error'); return }
     toast('Role deleted')
     await loadCustomRoles()
     if (sel === id) setSel(STATIC_ROLES[0])
