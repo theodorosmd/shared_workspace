@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { useTheme } from '@/lib/theme'
 
 export function PageHeader({ title, sub, action, onAction }: { title: string; sub: string; action?: string; onAction?: () => void }) {
@@ -10,7 +11,7 @@ export function PageHeader({ title, sub, action, onAction }: { title: string; su
       </div>
       {action && onAction && (
         <button onClick={onAction} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: '#2563eb', border: 'none', borderRadius: 7, color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer', letterSpacing: '0.01em' }}>
-          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
+          <Plus size={13} />
           {action}
         </button>
       )}
