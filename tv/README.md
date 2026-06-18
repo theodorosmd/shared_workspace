@@ -9,13 +9,11 @@ bottom (they cannot share this web codebase).
 
 ## Configure the stream
 
-The app plays a single HLS (`.m3u8`) URL. Set it either way:
+The Suryoyo Sat live HLS URL is already baked into `src/config.ts` (the Castr
+master playlist, multi-bitrate 360p–1080p). It works out of the box — no setup.
 
-- **Env var:** copy `.env.example` to `.env` and set `VITE_LIVE_STREAM_URL`, or
-- **Hardcode:** paste it into `streamUrl` in `src/config.ts`.
-
-Suryoyo Sat broadcasts through **Castr**, so copy the HLS / embed URL from the
-Castr dashboard (it looks like `https://stream.castr.com/<id>/playlist.m3u8`).
+To point at a different source, override it without touching code: copy
+`.env.example` to `.env` and set `VITE_LIVE_STREAM_URL`.
 
 ## Develop
 
