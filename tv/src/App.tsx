@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import LivePlayer from './LivePlayer'
-import { useLiveChannel } from './useLiveChannel'
+import { CHANNEL } from './config'
 import { resolveTvKey, registerTizenKeys, exitApp } from './tvKeys'
 
 export default function App() {
-  const state = useLiveChannel()
   const [fatal, setFatal] = useState<string | null>(null)
   const [infoVisible, setInfoVisible] = useState(true)
   const hideTimer = useRef<number | undefined>(undefined)
@@ -43,19 +42,8 @@ export default function App() {
     }
   }, [flashInfo, infoVisible])
 
-  if (state.status === 'loading') {
-    return (
-      <main className="stage">
-        <div className="center">
-          <div className="spinner" />
-          <p className="muted">Loading Suryoyo Sat…</p>
-        </div>
-      </main>
-    )
-  }
-
-  if (fatal || state.status === 'error') {
-    const message = fatal ?? (state.status === 'error' ? state.message : 'Unknown error')
+  const message = fatal ?? (CHANNEL.streamUrl ? null : 'No live stream URL configured. Set VITE_LIVE_STREAM_URL.')
+  if (message) {
     return (
       <main className="stage">
         <div className="center">
@@ -69,17 +57,16 @@ export default function App() {
     )
   }
 
-  const channel = state.channel
   return (
     <main className="stage" onClick={flashInfo}>
-      <LivePlayer src={channel.stream_url} onFatal={setFatal} />
+      <LivePlayer src={CHANNEL.streamUrl} onFatal={setFatal} />
 
       <div className={`banner ${infoVisible ? 'show' : ''}`}>
         <span className="live-dot" />
         <span className="live-label">LIVE</span>
         <div className="banner-text">
-          <span className="ch-name">{channel.name}</span>
-          {channel.description && <span className="ch-sub">{channel.description}</span>}
+          <span className="ch-name">{CHANNEL.name}</span>
+          {CHANNEL.description && <span className="ch-sub">{CHANNEL.description}</span>}
         </div>
       </div>
     </main>
