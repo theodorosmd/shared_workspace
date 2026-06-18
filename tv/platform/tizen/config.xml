@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Samsung Tizen TV packaging manifest.
+  Copy this file (and an icon.png) into the Vite build output (../../dist)
+  before packaging, then run the Tizen CLI to produce a .wgt:
+
+    npm run build
+    cp platform/tizen/config.xml dist/
+    cp platform/tizen/icon.png   dist/        # 512x512 PNG
+    tizen build-web   -- dist
+    tizen package -t wgt -s <your-cert> -- dist/.buildResult
+-->
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://suryoyosat.com/tv"
+        version="0.1.0"
+        viewmodes="maximized">
+  <tizen:application id="SuryoyoTV0.SuryoyoSatTV" package="SuryoyoTV0" required_version="6.0"/>
+  <content src="index.html"/>
+  <name>Suryoyo Sat</name>
+  <icon src="icon.png"/>
+  <tizen:profile name="tv"/>
+  <feature name="http://tizen.org/feature/screen.size.all"/>
+  <tizen:privilege name="http://tizen.org/privilege/internet"/>
+  <tizen:setting screen-orientation="landscape" background-support="disable"/>
+  <access origin="*" subdomains="true"/>
+</widget>

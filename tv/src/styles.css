@@ -1,0 +1,117 @@
+:root {
+  --bg: #07090d;
+  --accent: #e11d2a; /* Suryoyo Sat red */
+  --text: #f4f6fb;
+  --muted: #8a93a6;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+.stage {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  background: #000;
+}
+
+.player {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* ── Centered states (loading / error) ─────────────────────────────── */
+.center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.2vh;
+  text-align: center;
+}
+
+.brand {
+  font-size: 3.4vh;
+  letter-spacing: 0.35vh;
+  font-weight: 800;
+  margin: 0;
+}
+
+.muted { color: var(--muted); font-size: 2.2vh; }
+.error { color: #ff8b8b; font-size: 2.4vh; max-width: 60vw; }
+
+.retry {
+  font-size: 2.4vh;
+  padding: 1.4vh 3.2vh;
+  border: 2px solid transparent;
+  border-radius: 1vh;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+.retry:focus { outline: none; border-color: #fff; transform: scale(1.04); }
+
+.spinner {
+  width: 6vh;
+  height: 6vh;
+  border: 0.6vh solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Channel banner ────────────────────────────────────────────────── */
+.banner {
+  position: absolute;
+  left: 4vw;
+  bottom: 5vh;
+  display: flex;
+  align-items: center;
+  gap: 1.6vh;
+  padding: 1.6vh 2.6vh;
+  border-radius: 1.4vh;
+  background: linear-gradient(180deg, rgba(7, 9, 13, 0.55), rgba(7, 9, 13, 0.82));
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(1.5vh);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+.banner.show { opacity: 1; transform: translateY(0); }
+
+.live-dot {
+  width: 1.3vh;
+  height: 1.3vh;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 1.4vh var(--accent);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 50% { opacity: 0.35; } }
+
+.live-label {
+  font-weight: 800;
+  font-size: 2vh;
+  letter-spacing: 0.2vh;
+  color: var(--accent);
+}
+
+.banner-text { display: flex; flex-direction: column; }
+.ch-name { font-size: 2.8vh; font-weight: 700; }
+.ch-sub { font-size: 1.9vh; color: var(--muted); }

@@ -1,0 +1,14 @@
+{
+  "id": "com.suryoyosat.tv",
+  "version": "0.1.0",
+  "vendor": "Suryoyo Sat",
+  "type": "web",
+  "main": "index.html",
+  "title": "Suryoyo Sat",
+  "icon": "icon.png",
+  "largeIcon": "icon-large.png",
+  "iconColor": "#e11d2a",
+  "bgColor": "#07090d",
+  "disableBackHistoryAPI": true,
+  "requiredMemory": 100
+}
